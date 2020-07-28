@@ -1,0 +1,9 @@
+Version:    5.13.0
+
+Releases:   https://github.com/FortAwesome/Font-Awesome/releases
+
+Homepage:   https://fontawesome.com
+
+Notes:      Replace the assets/fonts/fontawesome-VERSION/ with the content from webfonts/.
+
+            Replace the vendor/fontawesome/scss with the content from scss/.

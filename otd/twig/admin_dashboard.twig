@@ -1,0 +1,497 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block page_scripts %}
+    <script>
+        clock('#app-server-time');
+    </script>
+
+    <script id="app-news-template" type="text/x-handlebars-template">
+		{% verbatim %}
+        <div>
+            <p class="title is-6">
+                <a href="https://{{ url }}" target="_blank" rel="nofollow noopener noreferrer">
+                    {{ title }}
+                </a>
+            </p>
+            <p class="subtitle is-7 has-text-grey">
+                {{ date }}
+            </p>
+            <p>
+                {{ excerpt }}
+                <a href="https://{{ url }}" target="_blank" rel="nofollow noopener noreferrer">[&hellip;]</a>
+            </p>
+        </div>
+        {{# if has_spacer }}
+            <hr class="has-background-grey-lighter">
+        {{/ if }}
+		{% endverbatim %}
+    </script>
+
+    <script src="/theme/otd/assets/js/page_admin_dashboard.js?{{ _app.cache_control }}"></script>
+{% endblock %}
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+<div class="columns">
+
+    {# Left side #}
+    <div class="column is-7-tablet is-7-desktop is-7-widescreen is-6-fullhd">
+
+        {# 1st #}
+        {% include 'includes/card_start_stacked.twig' with { '_label': server, '_icon': 'fas fa-server' } %}
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped">
+                    <tbody>
+                        <tr>
+                            <th>{{ server_time }}</th>
+                            <td>
+                                <span id="app-server-time">
+                                    {{ _server_time }}
+                                </span>
+                                ({{ _time_zone }})
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ uptime }}</th>
+                            <td>
+                                <ul class="horizontal-separated-list">
+                                    <li>{{ _uptime.days }} {{ days }}</li>
+                                    <li>{{ _uptime.hours }} {{ hours }}</li>
+                                    <li>{{ _uptime.minutes }} {{ minutes }}</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ hostname }}</th>
+                            <td>{{ _hostname }}</td>
+                        </tr>
+                        <tr>
+                            <th>{{ ip_addresses }}</th>
+                            <td>
+                                <ul class="horizontal-separated-list">
+                                    {% for ip_address in _ip_addresses %}
+                                    <li>{{ ip_address }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                        {% if _ssh_fingerprint %}
+                            <tr>
+                                <th>
+                                    {{ ssh_fingerprint }}
+                                </th>
+                                <td>
+                                    <ul class="horizontal-separated-list">
+                                    {% for _algorithm, _formats in _ssh_fingerprint %}
+                                        {% set _tippy_content %}
+                                            <table class="table is-narrow">
+                                            {% for _format, _key in _formats %}
+                                                <tr>
+                                                    <th>{{ _format }}</th>
+                                                    <td class="is-family-monospace">{{ _key }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </table>
+                                        {% endset %}
+                                        <li>
+                                            <a href="javascript:void(0)" class="app-tooltip-click" data-tippy-maxWidth="500px" data-tippy-content="{{ _tippy_content|escape('html') }}">{{ _algorithm }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <th>CPU</th>
+                            <td>
+                                {% include 'includes/chunk_cpu_info.twig' with { '_cpu': _cpu } %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ cpu_load }}</th>
+                            <td>
+                                {% include 'includes/chunk_cpu_load.twig' with { '_load': _load } %}
+
+                                {% if _is_lxc_virtualization %}
+                                    <div class="has-text-grey">
+                                        <small>
+                                            {{ lxc_load_incorrect }}
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ process_count }}</th>
+                            <td>
+                                <ul class="horizontal-separated-list">
+                                    <li>{{ _process_count }}</li>
+                                    <li><a href="?page=admin_process_manager">{{ manage }}</a></li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ emails_in_queue }}</th>
+                            <td>
+                                <ul class="horizontal-separated-list">
+                                    <li>{{ _emails_in_queue }}</li>
+                                    <li><a href="?page=admin_mailqueue">{{ manage }}</a></li>
+                                </ul>
+                            </td>
+                        </tr>
+
+                        {% for usage_value in _usage_values %}
+                            <tr>
+                                <th>{{ usage_value.label }}</th>
+                                <td>
+                                    <ul class="horizontal-separated-list">
+                                        <li><b>{{ free }}:</b> {{ usage_value.free }}</li>
+                                        <li><b>{{ used }}:</b> {{ usage_value.used }}</li>
+                                        <li><b>{{ total }}:</b> {{ usage_value.total }}</li>
+                                    </ul>
+                                    {{ macros.usage_indicator({
+                                        'percent': usage_value.percent,
+                                    }) }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% include 'includes/card_end_stacked.twig' %}
+
+
+        {# 2nd #}
+        {% include 'includes/card_start_stacked.twig' with { '_label': applications, '_icon': 'fas fa-desktop', '_has_margin_top': true } %}
+            <div class="has-margin-bottom-medium" style="display: none">
+                <div id="app-software-updates-available" class="has-text-centered" style="display: none">
+                    <!-- added by javascript -->
+
+                    {% if _is_server_update_disabled %}
+                        <div class="has-text-danger has-text-weight-bold">
+                            {{ auto_update_disabled }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div id="app-reboot-required" class="has-text-centered" style="display: none">
+                    <div class="has-text-danger has-text-weight-bold">
+                        {{ reboot_required }}
+                    </div>
+                    <div class="has-margin-top-medium">
+                        {{ forms.button({
+                            'label': reboot_server,
+                            'style': 'primary',
+                            'url': '?page=admin_configuration&configure=reboot'
+                        }) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped">
+                    <tbody>
+                        <tr>
+                            <th>{{ operating_system }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _os.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{ _os.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ kernel }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _kernel.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{ _kernel.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ _whitelabel.product_name ? administration_panel : 'KeyHelp' }}
+                            </th>
+                            <td class="has-text-centered">
+                                {% if _whitelabel.product_name and _whitelabel.favicon %}
+                                    <img class="svg-vendor-logo" src="{{ _whitelabel.favicon }}">
+                                {% else %}
+                                    <img class="svg-vendor-logo" src="/theme/otd/assets/img/keyhelp-logo.svg?{{ _app.cache_control }}" alt="">
+                                {% endif %}
+                            </td>
+                            <td>
+                                <ul class="horizontal-separated-list">
+                                    <li>
+                                        {{ _keyhelp.version }}
+                                        <span class="has-text-grey">
+                                            <small>
+                                                (Build {{ _keyhelp.build }})
+                                            </small>
+                                        </span>
+                                    </li>
+                                    {% if not _whitelabel.is_hide_changelog %}
+                                        <li><a href="https://changelog.keyhelp.de" target="_blank" rel="nofollow noopener noreferrer">{{ changelog }}</a></li>
+                                    {% endif %}
+                                </ul>
+
+                                <div id="app-keyhelp-update-available" class="has-text-success has-text-weight-bold" style="display: none">
+                                    {{ update_available }}
+                                </div>
+
+                                <div id="app-keyhelp-update-info-error" class="has-text-danger has-text-weight-bold" style="display: none">
+                                    {{ update_info_error }}
+                                </div>
+
+                                {% if _is_panel_update_disabled %}
+                                    <div class="has-text-danger has-text-weight-bold">
+                                        {{ auto_update_disabled }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ web_server }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _web_server.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{ _web_server.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>PHP</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _php.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{ _php.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ database_server }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _database_server.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{ _database_server.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ ftp_server }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _ftp_server.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{ _ftp_server.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ mail_transfer_agent }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _mail_transfer_agent.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{_mail_transfer_agent.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ mail_delivery_agent }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _mail_delivery_agent.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{_mail_delivery_agent.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ database_administration }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _database_administration.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{ _database_administration.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ webmail }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _webmail.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{ _webmail.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ cryptography }}</th>
+                            <td class="has-text-centered">
+                                <img class="svg-vendor-logo" src="/theme/otd/assets/img/vendor/{{ _cryptography.key }}.svg?{{ _app.cache_control }}" alt="">
+                            </td>
+                            <td>
+                                {{ _cryptography.label }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% include 'includes/card_end_stacked.twig' %}
+
+    </div>
+
+    {# Right side #}
+    <div class="column">
+
+        {# 1st #}
+        {% include 'includes/card_start_stacked.twig' with { '_label': notes, '_icon': 'far fa-edit' } %}
+            {# "<div>" | Introducing div comes from card_start_stacked.twig #}
+                <div id="app-notes" class="has-pre-wrap">{{ _notes }}</div>
+                <textarea id="app-notes-textarea" class="textarea app-auto-resize" style="display: none"></textarea>
+            </div>
+            <div class="card-footer">
+                <div class="card-footer-item has-text-right">
+                    <a href="javascript:void(0)" id="app-edit-notes">
+                        {{ edit }}
+                    </a>
+                    <a href="javascript:void(0)" id="app-save-notes" style="display: none">
+                        {{ save }}
+                    </a>
+                </div>
+            {# "</div> | The card_end_stacked.twig takes care of closing the div container #}
+        {% include 'includes/card_end_stacked.twig' %}
+
+        <!-- 1.1 (Status) -->
+
+		      {% include 'includes/card_start_stacked.twig' with { '_label': 'Serverdienste', '_icon': 'fas fa-tachometer-alt fa-lg', '_has_margin_top': true } %}
+            {% include 'includes/status.twig' %}
+	        {% include 'includes/card_end_stacked.twig' %}
+
+        <!-- 1. (StatusSteuerung) -->
+
+		      {% include 'includes/card_start_stacked.twig' with { '_label': 'Service Control (Custom)', '_icon': 'fas fa-tachometer-alt fa-lg', '_has_margin_top': true } %}
+            {% include 'includes/status_ctl.twig' %}
+	        {% include 'includes/card_end_stacked.twig' %}
+
+
+        {# 2nd #}
+        {% include 'includes/card_start_stacked.twig' with { '_label': resources, '_icon': 'fas fa-tachometer-alt', '_has_margin_top': true } %}
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped">
+                    <tbody>
+                        <tr>
+                            <th>
+                                {{ admin_accounts }}
+                            </th>
+                            <td>
+                                {{ _admin_accounts }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ user_accounts }}
+                            </th>
+                            <td>
+                                {{ _user_accounts }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ domains }}
+                            </th>
+                            <td>
+                                {{ _domains }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ subdomains }}
+                            </th>
+                            <td>
+                                {{ _subdomains }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ email_accounts }}
+                            </th>
+                            <td>
+                                {{ _email_accounts }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ email_addresses }}
+                            </th>
+                            <td>
+                                {{ _email_addresses }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ databases }}
+                            </th>
+                            <td>
+                                {{ _databases }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ ftp_users }}
+                            </th>
+                            <td>
+                                {{ _ftp_users }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ scheduled_tasks }}
+                            </th>
+                            <td>
+                                {{ _scheduled_tasks }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ consumed_disk_space }}
+                            </th>
+                            <td>
+                                {{ _consumed_disk_space }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ traffic }} / {{ _traffic_month }}
+                            </th>
+                            <td>
+                                {{ _traffic }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% include 'includes/card_end_stacked.twig' %}
+
+        {# 3rd #}
+        {% if not _whitelabel.is_hide_news %}
+            {% include 'includes/card_start_stacked.twig' with { '_label': news, '_icon': 'far fa-newspaper', '_has_margin_top': true } %}
+                <div id="app-news-container">
+                    <!-- added by javascript -->
+
+                    <div class="has-margin-large has-padding-small">
+                        <!--
+                            Only to have some content, so that loading animation can be displayed.
+                            Will be overriden, when ajax call was finished.
+                        -->
+                    </div>
+                </div>
+            {% include 'includes/card_end_stacked.twig' %}
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

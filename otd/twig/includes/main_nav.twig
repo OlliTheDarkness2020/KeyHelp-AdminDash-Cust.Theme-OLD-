@@ -1,0 +1,29 @@
+<nav id="main-nav" class="menu has-margin-left-xsmall">
+    {% for category in navigation %}
+        <div class="app-menu-category has-margin-bottom-medium">
+            <p class="menu-label has-margin-bottom-small {{ category.is_collapsed ? 'app-is-collapsed' }}" data-category="{{ category.id }}">
+                <span class="icon is-medium">
+                    <i class="{{ category.icon }}"></i>
+                </span>
+
+                {{ category.label }}
+
+                <span class="app-menu-arrow icon is-medium is-pulled-right has-margin-right-medium">
+                    <i class="fas fa-angle-{{ category.is_collapsed ? 'right' : 'down' }}"></i>
+                </span>
+            </p>
+            <ul class="menu-list" {{ category.is_collapsed ? 'style="display:none"' }}>
+            {% for item in category.items %}
+                <li>
+                    <a href="{{ item.url }}" {{ item.extern ? 'target="_blank" rel="nofollow noopener noreferrer"' }} {{ item.is_active ? 'class="is-active"' }}>
+                        <span class="icon is-small">
+                            <i class="fas fa-angle-right"></i>
+                        </span>
+                        {{ item.label }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+</nav>

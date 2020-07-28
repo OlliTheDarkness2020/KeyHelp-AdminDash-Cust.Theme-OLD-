@@ -1,0 +1,11 @@
+Version:    4.7.3
+
+Releases:   https://github.com/wycats/handlebars.js/releases
+
+Download:   https://handlebarsjs.com/installation/#npm-or-yarn-recommended
+            http://builds.handlebarsjs.com.s3.amazonaws.com/bucket-listing.html?sort=lastmod&sortdir=desc
+
+Homepage:   https://handlebarsjs.com/
+
+Update:     Download the minified compile + runtime version from their website.
+            Replace content of the handlebars.min.js file with the new one.

@@ -1,0 +1,14 @@
+Version:    4.0.13
+
+Releases:   https://github.com/select2/select2/releases
+
+Homepage:   https://select2.org/
+
+Update:     1)      Replace the select2.min.js from "dist/js/select2.min.js".
+
+            2)      Copy the corresponding files from "dist/js/i18n/" into the i18n directories.
+            2.1)    Rename "<language>-<country>" to "<language>_<country>" to match our language-string formatting
+            2.1.1)  Open each file of those renamed files and do the same replacement on all occurances there to
+
+            3)      Replace the scss dir
+            3.1)    Modify the /theme/bulma/assets/__scss/partials/_vendor_select2.scss to match our styles
