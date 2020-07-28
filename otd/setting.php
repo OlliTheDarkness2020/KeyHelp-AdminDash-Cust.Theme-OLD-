@@ -17,8 +17,8 @@ Datenschutzhinweiß für Funktion $pucheck und $elcheck:
 /*	Block Aktivierung	*/
 
 	$block_service 		= 'true';
-	$block_teamspeak 	= 'true';
-	$block_sysctl		 	= 'true'; // Keine Funktion gegenwärtig, Platzhalter / Dev
+	$block_teamspeak 	= 'false';
+	$block_sysctl		 	= 'false'; // Keine Funktion gegenwärtig, Platzhalter / Dev
 	$block_smart	 		= 'false';
 	$block_raid	 			= 'false';
 
@@ -32,7 +32,7 @@ Datenschutzhinweiß für Funktion $pucheck und $elcheck:
 
 /*	>>TeamSpeak3 Konfiguration<<	*/
 
-  $tsserver   		= array('136.243.96.238');
+  $tsserver   		= array('1.2.3.4');
 
   $tsquery  		= array('10011');
 
@@ -40,6 +40,6 @@ Datenschutzhinweiß für Funktion $pucheck und $elcheck:
 
 	$tsuser			= array('serveradmin');
 
-	$tspass			= array('gBxKNjMV');
+	$tspass			= array('KENNWORT');
 
 ?>
