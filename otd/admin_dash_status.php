@@ -173,255 +173,264 @@ break;
 		/* Service Monitor Beginn */
 
 case 'service':
-
-		/* --------- Dienste STATUS --------- */
-
-		if ($block_service == 'true')
-			{
-				echo '
-    <div class="table-container">
-                <table class="table is-fullwidth is-striped">
-                    <tbody>
+/* --------- Dienste STATUS --------- */
+	if ($block_service == 'true')
+		{
+			echo '<div align="center"><h2><u>Basics</u></h2>(Stand: '.date ("d.m.Y H:i", time()).' Uhr)</div>
+			<div class="table-container">
+            <table class="table is-fullwidth is-striped">
+				<colgroup>
+					<col span="1" style="width: 60%;">
+					<col span="1" style="width: 20%;">
+					<col span="1" style="width: 20%;">
+				</colgroup>
+            <tbody>
 			<tr>
-				<th><u>Dienst</u></th>
-				<th><u>Port</u></th>
-				<th><u>Status</u></th>
+				<th><u>Name</u></th>
+				<th><center><u>Port</u></center></th>
+				<th><center><u>Status</u></center></th>
 			</tr>
          ';
-
-				foreach (array_combine($tcpports, $tcpdienste) as $tcpport => $tcpdienst)
-					{
-						$tcpconnection = @fsockopen($tcpserver, $tcpport);;
-						if (is_resource($tcpconnection))
-							{
-								echo '<tr> <td> <b>' . $tcpdienst . ' </b> </td> <td> ' . $tcpport . ' </td> <td> ' . ' <font color="green"> Online </font> </td> </tr>';
-
-								fclose($tcpconnection);
-							}
-
-						else
-							{
-								echo '<tr> <td> <b>' . $tcpdienst . '</b> </td> <td> ' . $tcpport . ' </td> <td> <font class="tab blink" color="red"> Offline </font> </td> </tr>';
-							}
-					}
-
-				echo '
-                    </tbody>
-                </table>
+			foreach (array_combine($tcpports, $tcpdienste) as $tcpport       => $tcpdienst)
+				{
+					$tcpconnection = @fsockopen($tcpserver, $tcpport);;
+					if (is_resource($tcpconnection))
+						{
+							echo '<tr><td><b>' . $tcpdienst . ' </b></td><td><center> ' . $tcpport . ' </center></td><td><center> ' . ' <font color="green"> Online </font></center></td></tr>';
+							fclose($tcpconnection);
+						}
+					else
+						{
+							echo '<tr><td><b>' . $tcpdienst . '</b></td><td><center> ' . $tcpport . ' </center></td><td><center><font class="tab blink" color="red"> Offline </font></center></td></tr>';
+						}
+				}
+			echo '
+            </tbody>
+            </table>
             </div>
 	       ';
-			}
-
-		/* --------- TEAMSPEAK STATUS --------- */
-
-		if ($block_teamspeak == 'true')
+		}
+/* --------- TEAMSPEAK STATUS --------- */
+	if ($block_teamspeak == 'true')
+		{
+			require_once ('assets/vendor/teamspeak3/TeamSpeak3.php');
+			echo '<div align="center"><h2><u>Teamspeak</u></h2>(Stand: '.date ("d.m.Y H:i", time()).' Uhr)</div>
+			<div class="table-container">
+			<table class="table is-fullwidth is-striped">
+				<colgroup>
+					<col span="1" style="width: 60%;">
+					<col span="1" style="width: 20%;">
+					<col span="1" style="width: 20%;">
+				</colgroup>
+			<tbody>
+			<tr>
+				<th><u>Server Name</u></th>
+				<th><center><u>IP</u></center></th>
+				<th><center><u>Status</u></center></th>
+			</tr>
+		';
+			foreach ( $tsserver as $idx => $val ) 
 			{
-				require_once ('assets/vendor/teamspeak3/TeamSpeak3.php');
-				echo '<div align="center"> <u><h2>TeamSpeak</h2></u> </div>
-								<div class="table-container">
-								<table class="table is-fullwidth is-striped">
-								 <tbody>
-								<tr>
-								<th><u>Server</u></th>
-								<th><u>Status</u></th>
-								</tr>
-				 ';
-				/* foreach (array_combine($tsport, $tsuser, $tsserver, $tsquery, $tspass) as $tsport => $tsuser => $tsserver => $tsquery => $tspass) */
-				foreach (array_combine($tsserver, $tspass) as $tsserver => $tspass)
+				$all_array[] = [ $val, $tsquery[$idx], $tsport[$idx], $tsuser[$idx], $tspass[$idx] ];
+			}
+			foreach ($all_array as $item)
+				{
+					try
+						{
+							$ts3      = TeamSpeak3::factory("serverquery://" . $item[3] . ":" . $item[4] . "@" . $item[0] . ":" . $item[1] . "/?server_port=" . $item[2]);
+					echo '
+						<tr>
+							<td><b>' . $ts3->virtualserver_name . '</b></td>
+							<td><center>' . $item[0] . ':' . $item[2] . '</center></td>
+							<td><center><font color="green"> Online </font></center></td>
+						</tr>
+					';
+						}
+					catch(Exception $e)
 					{
-						try
-							{
-								$ts3      = TeamSpeak3::factory("serverquery://serveradmin:" . $tspass . "@" . $tsserver . ":10011/?server_port=9987");
-										echo '
-	<tr>
-		<td>
-			' . $ts3->virtualserver_name . ' ( ' . $ts3->virtualserver_port . ' )
-		</td>
-		<td>
-		<font color="green"> Online </font>
-		</td>
-	</tr>
-';
-}
-		 catch(Exception $e)
-{
-  echo '
-	<tr>
-		<td>
-			' . $tsport . '
-		</td>
-		<td>
-		<font class="tab blink" color="red"> Offline </font>
-		</td>
-	</tr>
-			 ';
-}
-	 }
-						echo '
- </tbody>
-</table>
-			             </div>
-
-									 <div class="modal fade" role="dialog" tabindex="-1">
-							         <div class="modal-dialog" role="document">
-							             <div class="modal-content">
-							                 <div class="modal-header">
-							                     <h4 class="modal-title">TeamSpeak Control</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button></div>
-							                 <div class="modal-body">
-							                     <h3 class="text-center">Server</h3>
-							                     <p class="text-danger flash animated">Startet den gesamten TeamSpeak Server neu !</p>
-							                     <div class="btn-group" role="group" style="margin: 0px;padding: 0px;margin-right: 15px;margin-left: 15px;padding-right: 20px;padding-left: 20px;"><button class="btn btn-success" type="button">Starten</button><button class="btn btn-warning" type="button" style="margin-left: 15px;">Neu starten</button><button class="btn btn-danger" type="button" style="margin-left: 15px;">Stoppen</button></div>
-							                     <h2
-							                         class="text-center" style="margin: 0px;margin-top: 15px;">Instanzen</h2>
-							                         <!-- Start: Server 1 -->
-							                         <p class="text-center"><span>Server 1<button class="btn btn-success" type="button" style="margin: 15px;">Start</button><button class="btn btn-danger" type="button" style="margin: 10px;">Stop</button></span></p>
-							                         <!-- End: Server 1 -->
-							                         <!-- Start: Server 2 -->
-							                         <p class="text-center"><span>Server 2<button class="btn btn-success" type="button" style="margin: 15px;">Start</button><button class="btn btn-danger" type="button" style="margin: 10px;">Stop</button></span></p>
-							                         <!-- End: Server 2 -->
-							                 </div>
-							                 <div class="modal-footer"><button class="btn btn-light" type="button" data-dismiss="modal">Schließen</button></div>
-							             </div>
-							         </div>
-							     </div>
-							     <script src="assets/js/jquery.min.js"></script>
-							     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-
-			 	       ';
-}
-
-		/* --------- SMART STATUS --------- */
-if ($block_smart == 'true')
-	{
-		$smart = "/home/keyhelp/www/keyhelp/theme/otd/stats/smart.log";
-		if(file_exists($smart)) {
-		    $fp = fopen($smart, "r");
-		    if ($fp) {
-		          $zeile = 0;
-		        while(!feof($fp)) {
-		          @$inhalt[] = explode(":", fgets($fp));
-		          @$inhalt[count(@$inhalt)-1][0];
-		          @$inhalt[count(@$inhalt)-1][1];
-		          $zeile++;
-		        }
-		        fclose($fp);
-		    }}
-				else {
-					@$inhalt = NULL;
-			echo '<b>Vermutlich lief der Cronjob noch nicht.<br />Entweder warten Sie bis zur Ausführung des Cron oder führen folgenden Befehl auf der Shell aus:<br /><br />"/home/keyhelp/www/keyhelp/theme/otd/test.sh"<br /><br />Danach sollte diese Meldung verschwunden und die Werte angezeigt werden.';
+					  echo '
+						<tr>
+							<td><b>----</b></td>
+							<td><center>' . $item[0] . ':' . $item[2] . '</center></td>
+							<td><center><font class="tab blink" color="red"> Offline </font></center></td>
+						</tr>
+					';
+					}
 				}
-		echo '
-		<div align="center"> <h2> <u> S.M.A.R.T Status </u> </h2> (Stand: '.date ("d.m.Y H:i", filemtime($smart)).' Uhr)</div>
-<div class="table-container">
-						<table class="table is-fullwidth is-striped">
-								<tbody>
-	<tr>
-		<th><u>Festplatte</u></th>
-		<th><u>Status</u></th>
-		<th><u>Temp.</u></th>
-	</tr>
-		 ';
-		 if (@$inhalt == NULL) {
-			 echo '<b>Vermutlich lief der Cronjob noch nicht.<br />Entweder warten Sie bis zur Ausführung des Cron oder führen folgenden Befehl auf der Shell aus:<br /><br />"/home/keyhelp/www/keyhelp/theme/otd/test.sh smart"<br /><br />Danach sollte diese Meldung verschwunden sein und die Werte angezeigt werden.';
-		 }
-		 else {
-		 	if (@$inhalt[0][0] == "Festplatte ") {
-				echo '<tr> <td> <b> '.@$inhalt[0][1].' </b> </td> <td> '.@$inhalt[1][1].' </td> <td> '.@$inhalt[2][1].' </td> </tr>';
-			}
-	if (count(@$inhalt) > "2") {
-			if (@$inhalt[3][0] == "Festplatte ") {
-				echo '<tr> <td> <b> '.@$inhalt[3][1].' </b> </td> <td> '.@$inhalt[4][1].' </td> <td> '.@$inhalt[5][1].' </td> </tr>';
-			}
-	if (count(@$inhalt) > "5") {
-			if (@$inhalt[6][0] == "Festplatte ") {
-				echo '<tr> <td> <b> '.@$inhalt[6][1].' </b> </td> <td> '.@$inhalt[7][1].' </td> <td> '.@$inhalt[8][1].' </td> </tr>';
-			}
-	if (count(@$inhalt) > "8") {
-			if (@$inhalt[9][0] == "Festplatte ") {
-				echo '<tr> <td> <b> '.@$inhalt[9][1].' </b> </td> <td> '.@$inhalt[10][1].' </td> <td> '.@$inhalt[11][1].' </td> </tr>';
-			}
-	if (count(@$inhalt) > "11") {
-			if (@$inhalt[12][0] == "Festplatte ") {
-				echo '<tr> <td> <b> '.@$inhalt[12][1].' </b> </td> <td> '.@$inhalt[13][1].' </td> <td> '.@$inhalt[14][1].' </td> </tr>';
-			}
-	}}}}}
-		echo '
-								</tbody>
-						</table>
-				</div>
-		 ';
-	 }
-
-	 /* --------- RAID STATUS --------- */
-if ($block_raid == 'true')
- {
-	 $raid = "/home/keyhelp/www/keyhelp/theme/otd/stats/raid.log";
-	 if(file_exists($raid)) {
-			 $fp = fopen($raid, "r");
-			 if ($fp) {
-						 $zeile = 0;
-					 while(!feof($fp)) {
-						 @$rinhalt[] = explode(":", fgets($fp));
-						 @$rinhalt[count($rinhalt)-1][0];
-						 @$rinhalt[count($rinhalt)-1][1];
-						 $zeile++;
-					 }
-					 fclose($fp);
-			 }}
-		else {
-			@$rinhalt = NULL;
-			echo '<b>Vermutlich lief der Cronjob noch nicht.<br />Entweder warten Sie bis zur Ausführung des Cron oder führen folgenden Befehl auf der Shell aus:<br /><br />"/home/keyhelp/www/keyhelp/theme/otd/test.sh raid"<br /><br />Danach sollte diese Meldung verschwunden und die Werte angezeigt werden.';
+				echo '
+			</tbody>
+			</table>
+			</div>
+			';
 		}
-	 echo '
-	 <div align="center"> <h2> <u> RAID Status </u> </h2> (Stand: ' .date ("d.m.Y H:i", filemtime($raid)). ' Uhr)</div>
-<div class="table-container">
-					 <table class="table is-fullwidth is-striped">
-							 <tbody>
- <tr>
-	 <th><u>Verbund</u></th>
-	 <th><u>Status</u></th>
- </tr>
-		';
-		if (@$rinhalt == NULL) {
-			echo '<tr> <td> <b> Fehler: </b> </td> <td> Datei nicht gefunden ! </td> </tr>';
+/* --------- SMART STATUS --------- */
+	if ($block_smart == 'true')
+		{
+			$smart = "/home/keyhelp/www/keyhelp/theme/otd/stats/smart.log";
+			if(file_exists($smart)) 
+			{
+				$fp = fopen($smart, "r");
+				if ($fp) 
+				{
+				$zeile = 0;
+				while(!feof($fp)) 
+					{
+						@$inhalt[] = explode(":", fgets($fp));
+						@$inhalt[count(@$inhalt)-1][0];
+						@$inhalt[count(@$inhalt)-1][1];
+						$zeile++;
+					}
+				fclose($fp);
+				}
+			}
+			else 
+			{
+				@$inhalt = NULL;
+				echo '<b>Vermutlich lief der Cronjob noch nicht.<br />Entweder warten Sie bis zur Ausführung des Cron oder führen folgenden Befehl auf der Shell aus:<br /><br />"/home/keyhelp/www/keyhelp/theme/otd/test.sh"<br /><br />Danach sollte diese Meldung verschwunden und die Werte angezeigt werden.';
+			}
+			echo '
+			<div align="center"><h2><u>S.M.A.R.T Status</u></h2>(Stand: '.date ("d.m.Y H:i", filemtime($smart)).' Uhr)</div>
+			<div class="table-container">
+				<table class="table is-fullwidth is-striped">
+				<colgroup>
+					<col span="1" style="width: 60%;">
+					<col span="1" style="width: 20%;">
+					<col span="1" style="width: 20%;">
+				</colgroup>
+			<tbody>
+			<tr>
+				<th><u>Festplatte</u></th>
+				<th><center><u>Temp.</u></center></th>
+				<th><center><u>Status</u></center></th>
+			</tr>
+			';
+			if (@$inhalt == NULL) 
+			{
+				echo '<b>Vermutlich lief der Cronjob noch nicht.<br />Entweder warten Sie bis zur Ausführung des Cron oder führen folgenden Befehl auf der Shell aus:<br /><br />"/home/keyhelp/www/keyhelp/theme/otd/test.sh smart"<br /><br />Danach sollte diese Meldung verschwunden sein und die Werte angezeigt werden.';
+			}
+			else 
+			{
+			if (@$inhalt[0][0] == "Festplatte ") 
+			{
+				echo '<tr><td><b> '.@$inhalt[0][1].' </b></td><td><center>'.@$inhalt[2][1].' </center></td><td><center> '.@$inhalt[1][1].' </center></td></tr>';
+			}
+			if (count(@$inhalt) > "2") 
+				{
+					if (@$inhalt[3][0] == "Festplatte ") 
+					{
+						echo '<tr><td><b> '.@$inhalt[3][1].' </b></td><td><center> '.@$inhalt[5][1].' </center></td><td><center> '.@$inhalt[4][1].' </center></td></tr>';
+					}
+					if (count(@$inhalt) > "5") 
+					{
+						if (@$inhalt[6][0] == "Festplatte ") 
+						{
+							echo '<tr><td><b> '.@$inhalt[6][1].' </b></td><td><center> '.@$inhalt[8][1].' </center></td><td><center> '.@$inhalt[7][1].' </center></td></tr>';
+						}
+						if (count(@$inhalt) > "8") 
+						{
+							if (@$inhalt[9][0] == "Festplatte ") 
+							{
+								echo '<tr><td><b> '.@$inhalt[9][1].' </b></td><td><center> '.@$inhalt[11][1].' </center></td><td><center> '.@$inhalt[10][1].' </center></td></tr>';
+							}
+							if (count(@$inhalt) > "11") 
+							{
+								if (@$inhalt[12][0] == "Festplatte ") 
+								{
+									echo '<tr><td><b> '.@$inhalt[12][1].' </b></td><td><center> '.@$inhalt[14][1].' </center></td><td><center> '.@$inhalt[13][1].' </center></td></tr>';
+								}
+							}
+						}
+					}
+				}
+			}
+			echo '
+			</tbody>
+			</table>
+			</div>
+		 ';
 		}
-		else {
-		 if (@$rinhalt[0][0] != NULL) {
-			 echo '<tr> <td> <b> '.@$rinhalt[0][0].' </b> </td> <td> '.@$rinhalt[0][1].' </td> </tr>';
-		 }
-		 if (@$rinhalt[1][0] != NULL) {
-			 echo '<tr> <td> <b> '.@$rinhalt[1][0].' </b> </td> <td> '.@$rinhalt[1][1].' </td></tr>';
-		 }
-		 if (@$rinhalt[2][0] != NULL) {
-			 echo '<tr> <td> <b> '.@$rinhalt[2][0].' </b> </td> <td> '.@$rinhalt[2][1].' </td> </tr>';
-		 }
-		 if (@@$rinhalt[3][0] != NULL) {
-			 echo '<tr> <td> <b> '.@$rinhalt[3][0].' </b> </td> <td> '.@$rinhalt[3][1].' </td> </tr>';
-		 }
-		 if (@@$rinhalt[4][0] != NULL) {
-			 echo '<tr> <td> <b> '.@$rinhalt[4][0].' </b> </td> <td> '.@$rinhalt[4][1].' </td> </tr>';
-		 }
-	 }
-	 echo '
-							 </tbody>
-					 </table>
-			 </div>
-		';
-	}
-
-break;
-		/* Service Monitor Ende */
-
-default:
+/* --------- RAID STATUS --------- */
+	if ($block_raid == 'true')
+		{
+			$raid = "/home/keyhelp/www/keyhelp/theme/otd/stats/raid.log";
+			if(file_exists($raid)) 
+			{
+				$fp = fopen($raid, "r");
+				if ($fp) 
+				{
+					$zeile = 0;
+					while(!feof($fp)) 
+					{
+						@$rinhalt[] = explode(":", fgets($fp));
+						@$rinhalt[count($rinhalt)-1][0];
+						@$rinhalt[count($rinhalt)-1][1];
+						$zeile++;
+					}
+					fclose($fp);
+				 }
+			 }
+			else 
+			{
+				@$rinhalt = NULL;
+				echo '<b>Vermutlich lief der Cronjob noch nicht.<br />Entweder warten Sie bis zur Ausführung des Cron oder führen folgenden Befehl auf der Shell aus:<br /><br />"/home/keyhelp/www/keyhelp/theme/otd/test.sh raid"<br /><br />Danach sollte diese Meldung verschwunden und die Werte angezeigt werden.';
+			}
+			echo '
+			<div align="center"> <h2> <u> RAID Status </u> </h2> (Stand: ' .date ("d.m.Y H:i", filemtime($raid)). ' Uhr)</div>
+			<div class="table-container">
+			<table class="table is-fullwidth is-striped">
+				<colgroup>
+					<col span="1" style="width: 80%;">
+					<col span="1" style="width: 20%;">
+				</colgroup>
+			<tbody>
+			<tr>
+				<th><u>Verbund</u></th>
+				<th><center><u>Status</u></center></th>
+			</tr>
+			';
+			if (@$rinhalt == NULL) 
+			{
+				echo '<tr><td><b>Fehler:</b></td><td> Datei nicht gefunden !</td></tr>';
+			}
+			else 
+			{
+				if (@$rinhalt[0][0] != NULL) 
+				{
+					echo '<tr><td><b> '.@$rinhalt[0][0].' </b></td><td><center> '.@$rinhalt[0][1].' </center></td></tr>';
+				}
+				if (@$rinhalt[1][0] != NULL) 
+				{
+					echo '<tr><td><b> '.@$rinhalt[1][0].' </b></td><td><center> '.@$rinhalt[1][1].' </center></td></tr>';
+				}
+				if (@$rinhalt[2][0] != NULL) 
+				{
+					echo '<tr><td><b> '.@$rinhalt[2][0].' </b></td><td><center> '.@$rinhalt[2][1].' </center></td></tr>';
+				}
+				if (@@$rinhalt[3][0] != NULL) 
+				{
+					echo '<tr><td><b> '.@$rinhalt[3][0].' </b></td><td><center> '.@$rinhalt[3][1].' </center></td></tr>';
+				}
+				if (@@$rinhalt[4][0] != NULL) 
+				{
+					echo '<tr><td><b> '.@$rinhalt[4][0].' </b></td><td><center> '.@$rinhalt[4][1].' </center></td></tr>';
+				}
+			}
+			echo '
+			</tbody>
+			</table>
+			</div>
+			';
+		}
+	break;
+/* Service Monitor Ende */
+	default:
 		echo 'Keine Ausgabe gewählt oder Daten fehlerhaft.';
-break;
+	break;
 	}
-
 /* SERVICE LISTE Ende */
-
 ?>
 <br />
 <?php
 emergency_lock_active:
 ?>
-<b> <u> <p style="text-align: center;"> Create 2020 by OlliTheDarkness </p> </u> </b>
+<b><u><p style="text-align: center;">Created 2020 by OlliTheDarkness</p></u></b>
