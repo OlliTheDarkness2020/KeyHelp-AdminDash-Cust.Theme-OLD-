@@ -114,7 +114,7 @@ case "$1" in
 	;;
 
   *)
-	echo "Fehlerhafte Eingabe: Nutzung wie folgt: /home/keyhelp/www/keyhelp/theme/otd/test.sh {smart|raid|both}" || true
+	echo "Fehlerhafte Eingabe: Nutzung wie folgt: /home/keyhelp/www/keyhelp/theme/otd/test.sh {smart|raid|both|ubu-smart|ubu-raid|ubu-both}" || true
 	unset befehl
 	unset platten
 	unset array
