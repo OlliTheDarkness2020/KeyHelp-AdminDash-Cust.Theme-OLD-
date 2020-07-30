@@ -8,7 +8,9 @@ GIT:
 
 Dash Panel:
 >-< Upgrade von 20.1 auf 20.2.
+
 >-< Änderung für pucheck & elcheck (Bitte Hinweiß in der settings.php.dist beachten)
+
 >-< Optimierungen am Code.
 
 
