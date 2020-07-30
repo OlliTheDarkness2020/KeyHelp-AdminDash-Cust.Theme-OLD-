@@ -26,6 +26,7 @@ KeyHelp Community (Ideenbringer)
 <br />
 
 <b> Hauptentwickler des Panels </b>
+
 KEYWEB AG (www.KeyWeb.de) - Community (community.keyhelp.de)
 
 <h3> !! ACHTUNG !! </h3>
