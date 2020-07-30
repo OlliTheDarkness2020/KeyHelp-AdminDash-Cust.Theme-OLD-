@@ -15,9 +15,13 @@ Dash Panel:
 
 
 Credits (Bezogen auf den Edit):
+
 OlliTheDarkness (Hauptentwickler)
+
 MoritzJuergensen (Unterstützender Entwickler)
+
 KeyHelp Community (Ideenbringer)
+
 
 
 Hauptentwickler des Panels:
