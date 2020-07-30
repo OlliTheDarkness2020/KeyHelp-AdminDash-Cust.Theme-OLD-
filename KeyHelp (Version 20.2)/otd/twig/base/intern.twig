@@ -1,0 +1,130 @@
+{% extends 'base/base.twig' %}
+
+
+
+{% block body_content %}
+{# Header #}
+<header id="header">
+    <nav id="top-nav">
+        <div class="level is-mobile">
+            <div class="level-left">
+                <a class="level-item" href="{{ _app.home_url }}">
+                    {% if _whitelabel.banner_intern %}
+                        <img src="{{ _whitelabel.banner_intern }}" alt="logo">
+                    {% else %}
+                        <figure>
+                            <img src="theme/bulma/assets/img/keyhelp.svg?{{ _app.cache_control }}" alt="logo">
+                        </figure>
+                    {% endif %}
+                </a>
+                <div class="level-item is-hidden-touch has-padding-left-medium has-text-grey-light">
+                    {% if _app.is_demo %}
+                        {{ demo_mode }} |
+                    {% endif %}
+                    {{ _app.area == 'admin' ? admin_area : user_area }}
+                    |
+                    <span id="clock" class="has-margin-left-xsmall">{{ _app.time }}</span>
+                </div>
+            </div>
+            <div class="level-left">
+                <a id="app-user-menu-toggle" class="level-item">
+                    <span class="icon is-large">
+                        <span class="fa-stack fa-1x">
+                            <i class="fa fa-square fa-stack-2x"></i>
+                            <i class="fas fa-user fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </span>
+                    <span class="is-hidden-mobile">
+                        <span class="is-hidden-mobile">
+                            <ul class="horizontal-separated-list">
+                                {% if _user_info_first %}
+                                    <li>{{ _user_info_first }}</li>
+                                {% endif %}
+                                {% if _user_info_second %}
+                                    <li>{{ _user_info_second }}</li>
+                                {% endif %}
+                                {% if _user_info_third %}
+                                    <li>{{ _user_info_third }}</li>
+                                {% endif %}
+                            </ul>
+                        </span>
+                        <span class="icon is-medium has-text-link">
+                            <i class="fas fa-angle-down"></i>
+                        </span>
+                    </span>
+                </a>
+                <a id="app-sidebar-toggle" class="level-item is-hidden-desktop">
+                    <span id="app-sidebar-toggle-icon" class="icon is-large">
+                        <i class="fas fa-bars fa-2x"></i>
+                    </span>
+                    <span id="app-sidebar-toggle-icon-active" class="icon is-large is-hidden">
+                        <i class="fas fa-times fa-2x"></i>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </nav>
+</header>
+
+{# User menu #}
+<div id="user-menu" class="is-hidden">
+    <a href="?page=profile" class="dropdown-item">
+        <span class="icon is-medium">
+            <i class="fas fa-user"></i>
+        </span>
+        {{ profile }}
+    </a>
+    <hr class="dropdown-divider">
+    <a href="?page=logout" class="dropdown-item">
+        <span class="icon is-medium">
+            <i class="fas fa-power-off"></i>
+        </span>
+        {{ logout }}
+    </a>
+</div>
+
+{# Sidebar #}
+<section id="sidebar">
+    {% include '/includes/main_nav.twig' %}
+</section>
+
+<div id="sidebar-overlay"></div>
+
+{# Main wrapper #}
+<section id="content-wrapper">
+    {# Content #}
+    <div id="content">
+
+        {% include 'includes/breadcrumbs.twig' %}
+
+        <div class="content-title">
+            <h1 class="title is-4">{{ content_title }}</h1>
+        </div>
+
+        {% include 'includes/events.twig' %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    {# Footer #}
+    <footer id="footer">
+        <div class="content has-text-centered">
+            {% if _whitelabel.footer %}
+                {{ _whitelabel.footer|raw }}
+            {% else %}
+                <p>
+                    {% if _app.footer_icon %}
+                        Made with <i class="{{ _app.footer_icon }}" style="color: #AE4852"></i> in Thuringia
+                    {% else %}
+                        Made with <img class="svg-heart" src="theme/bulma/assets/img/heart.svg?{{ _app.cache_control }}" alt=""> in Thuringia
+                    {% endif %}
+                </p>
+                <p>
+                    {{ _app.footer|raw }}
+                </p>
+            {% endif %}
+        </div>
+    </footer>
+</section>
+{% endblock %}
