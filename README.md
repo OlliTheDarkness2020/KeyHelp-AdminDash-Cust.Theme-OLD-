@@ -24,4 +24,5 @@ Hauptentwickler des Panels:
 KEYWEB AG (www.KeyWeb.de) - Community (community.keyhelp.de)
 
 !! ACHTUNG !!
+
 Die KeyWeb AG steht mit diesem Projekt in keinem Zusammenhang, die Entwicklung erfolgt frei und ausschließlich durch die Community.
