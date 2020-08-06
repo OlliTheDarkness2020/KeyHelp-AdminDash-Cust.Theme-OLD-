@@ -1,30 +1,233 @@
 //----------------------------------------------------------------------------------------------------------------------
+// OTD Debug System On / Off
+//----------------------------------------------------------------------------------------------------------------------
+
+var consoleHolder = console;
+function debug(bool){
+    if(!bool){
+        consoleHolder = console;
+        console = {};
+        Object.keys(consoleHolder).forEach(function(key){
+            console[key] = function(){};
+        })
+    }else{
+        console = consoleHolder;
+    }
+}
+debug(false);
+
+//----------------------------------------------------------------------------------------------------------------------
+// OTD Allgemeines
+//----------------------------------------------------------------------------------------------------------------------
+
+var blockreq = getXmlHttpRequestObject('Blocksystem');
+var req = getXmlHttpRequestObject('TS3 CCS');
+
+window.onload = getBlockStat();
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Sleeper
+//----------------------------------------------------------------------------------------------------------------------
+
+function Sleeper(milliseconds) {
+ return new Promise(resolve => setTimeout(resolve, milliseconds));
+};
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// OTD Requester
+//----------------------------------------------------------------------------------------------------------------------
+
+function getXmlHttpRequestObject(aw)
+  {
+    console.debug('(Request) Funktion ausgelöst von '+aw+' ! ');
+    if(window.XMLHttpRequest)
+      {
+        return new XMLHttpRequest();
+      }
+    else if(window.ActiveXObject)
+      {
+        return new ActiveXObject("Microsoft.XMLHTTP");
+      }
+    else
+      {
+        alert('Ajax funktioniert bei Ihnen nicht !');
+      }
+  };
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// OTD Block Viewer Steuerung
+//----------------------------------------------------------------------------------------------------------------------
+
+    function getBlockStat()
+      {
+        console.debug('(Funktion) getBlockStat (Blocksystem) ausgelöst. ');
+        if(blockreq.readyState == 4 || blockreq.readyState == 0)
+          {
+            console.debug('(Blocksystem) JSON Abfrage gesendet ... ');
+            blockreq.open('GET', 'theme/otd/setting_block.json', true);
+            blockreq.setRequestHeader("Content-Type","text/plain");
+            blockreq.onreadystatechange = setBlockMessage;
+            console.debug('(Blocksystem) JSON Abfrage, erwarte Ergebnis ... ');
+            // await Sleeper(5000);
+            blockreq.send(null);
+          }
+        else
+          {
+            console.debug('(Blocksystem) Upps, da ging was schief ... ');
+          }
+      };
+
+    function setBlockMessage()
+      {
+        console.debug('(Funktion) setBlockMessage (Blocksystem) ausgelöst. ');
+        if(blockreq.readyState == 4)
+          {
+            console.debug('(Funktion) setBlockMessage (Blocksystem) Ergebnis empfangen. ');
+            var response = eval('(' + blockreq.responseText+ ')');
+              for (var prop in response)
+                {
+                  console.debug('Setze Variable: Bereich: '+prop+' = '+response[prop]+'');
+
+                  if (response[prop] === 'true')
+                    {
+                      console.debug('Bereich: '+prop+' ist als TRUE erkannt !');
+                      document.getElementById(prop+'_Div').style.display = "block";
+                     }
+                   else
+                     {
+                       console.debug('Bereich: '+prop+' ist als FALSE erkannt !');
+                       document.getElementById(prop+'_Div').style.display = "none";
+                     }
+                  console.debug('Variable wurde gesetzt !');
+                }
+            console.debug('(Funktion) setBlockMessage (Blocksystem) abgeschlossen. ');
+          }
+      };
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// OTD TeamSpeak Control Command Steuerung
+//----------------------------------------------------------------------------------------------------------------------
+
+    function getStat(control, tsp, tskey)
+      {
+        console.debug('(Funktion) getStat (TS3 CCS) ausgelöst. ');
+        if(req.readyState == 4 || req.readyState == 0)
+          {
+            console.debug('(Funktion) getStat (TS3 CCS) Anfrage ... ');
+            req.open('GET', 'theme/otd/admin_dash_status.php?realtime=teamspeak3_controller&tscontrol='+control+'&tsp='+tsp+'&tskey='+tskey, true);
+            req.setRequestHeader("Content-Type","text/plain");
+            console.debug('(Funktion) getStat (TS3 CCS) Anfrage ausgeführt ! ');
+            req.onreadystatechange = setMessage;
+            req.send(null);
+          }
+        else
+          {
+            console.debug('(Funktion) getStat (TS3 CCS) Anfrage fehlerhaft, abgebrochen ! ');
+            document.getElementById('ts3stat').innerHTML = 'Upps, da ging was schief ...';
+            console.warn(request.statusText, request.responseText);
+          }
+      };
+
+    async function setMessage()
+      {
+        console.debug('(Funktion) setMessage (TS3 CCS) ausgelöst. ');
+        if(req.readyState == 4)
+          {
+            console.debug('(Funktion) setMessage (TS3 CCS) Ergebnis auswerten ...');
+            var response = eval('(' + req.responseText+ ')');
+            document.getElementById('ts3stat').innerHTML = response.servinst;
+            console.debug('(Funktion) setMessage (TS3 CCS) Ergebnis OK. ');
+            await Sleeper(15000);
+            document.getElementById('ts3stat').innerHTML = '';
+          }
+      };
+
+
+//----------------------------------------------------------------------------------------------------------------------
 // OTD Service Status
 //----------------------------------------------------------------------------------------------------------------------
 
-$(function(){
-     var a = $("#sload");
-     setInterval(function(){
+     var ServiceDiv = $("#Service");
+     function ServiceAbfrage(){
+       console.debug('(Service Box) Intervalabfrage ausgelöst ! ');
          $.post('theme/otd/admin_dash_status.php?realtime=service', {
-         }, function(data){
-            $(a).html(data);
+         }, function(ServiceData){
+            $(ServiceDiv).html(ServiceData);
          });
-     }, 5000);
-});
+     };
+
+     ServiceAbfrage();
+     setInterval(ServiceAbfrage, 5000);
+
 
 //----------------------------------------------------------------------------------------------------------------------
-// OTD Service Control Status
+// OTD RAID Status
 //----------------------------------------------------------------------------------------------------------------------
 
-$(function(){
-     var a = $("#ctlload");
-     setInterval(function(){
-         $.post('theme/otd/admin_dash_status.php?realtime=ctl', {
-         }, function(data){
-            $(a).html(data);
+     var RaidDiv = $("#Raid");
+     function RaidAbfrage(){
+       console.debug('(Raid Box) Abfrage ausgelöst ! ');
+         $.post('theme/otd/admin_dash_status.php?realtime=raid', {
+         }, function(RaidData){
+            $(RaidDiv).html(RaidData);
          });
-     }, 10000);
-});
+     };
+
+     RaidAbfrage();
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// OTD S.M.A.R.T Status
+//----------------------------------------------------------------------------------------------------------------------
+
+    var SmartDiv = $("#Smart");
+    function SmartAbfrage(){
+      console.debug('(S.M.A.R.T Box) Abfrage ausgelöst ! ');
+        $.post('theme/otd/admin_dash_status.php?realtime=smart', {
+        }, function(SmartData){
+           $(SmartDiv).html(SmartData);
+        });
+    };
+
+    SmartAbfrage();
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// OTD TeamSpeak Control Status
+//----------------------------------------------------------------------------------------------------------------------
+
+     var TeamSpeak3Div = $("#TeamSpeak3");
+     function TeamSpeakAbfrage(){
+       console.debug('TeamSpeak3 Box Intervalabfrage ausgelöst !');
+          $.post('theme/otd/admin_dash_status.php?realtime=teamspeak3', {
+         }, async function(data){
+            $(TeamSpeak3Div).html(data);
+            });
+     };
+
+     TeamSpeakAbfrage();
+     setInterval(TeamSpeakAbfrage, 5000);
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// OTD DiskSpace Status
+//----------------------------------------------------------------------------------------------------------------------
+
+    var DiskspaceDiv = $("#Diskspace");
+    function DiskspaceAbfrage(){
+      console.debug('(Diskspace Box) Abfrage ausgelöst ! ');
+        $.post('theme/otd/admin_dash_status.php?realtime=diskspace', {
+        }, function(DiskspaceData){
+           $(DiskspaceDiv).html(DiskspaceData);
+        });
+    };
+
+    DiskspaceAbfrage();
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // news
