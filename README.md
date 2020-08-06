@@ -8,10 +8,19 @@ GIT:
 
 Dash Panel:
 >-< Vollständige Umstrukturierung und Optimierungen des Codes durchgeführt.
+
 >-< Alle Bereiche nutzen nun eine eigene Box. (BLOCK)
+
 >-< NEU: Speicherplatz Anzeige , Steuerung via setinng.php.
+
 >-< NEU: START / STOPP von TeamSpeak Instanzen.
+
 >-< Blockanzeige via JSON auf Basis der Style Option Display none / block.
+
+<b> WICHTIG </b>
+
+BITTE DIE NEUE setting.php benutzen !
+
 
 
 
@@ -23,7 +32,9 @@ GIT:
 
 Dash Panel:
 >-< Upgrade von 20.1 auf 20.2.
+
 >-< Änderung für pucheck & elcheck (Bitte Hinweiß in der settings.php.dist beachten)
+
 >-< Optimierungen am Code.
 
 
