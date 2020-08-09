@@ -1,0 +1,34 @@
+{% import "macros/macros.twig" as macros %}
+{% import "macros/forms.twig" as forms %}
+
+{% apply spaceless %}
+    {% set addons = {
+        'right': {
+            'type': 'action',
+            'label': browse ~ '...',
+            'action': 'app-browse-directory'
+        }
+    } %}
+    {% if _append_directory %}
+        {% set addons = addons | merge({
+            'left': {
+                'label': _append_directory,
+            }
+        }) %}
+    {% endif %}
+{% endapply %}
+
+<div id="app-directory-browser-container" data-purpose="{{ _purpose }}" data-id-user="{{ _id_user }}" data-username="{{ _username }}">
+    {{ forms.input_wrapped({
+        'label': _label | default(directory),
+        'name': _name | default('path'),
+        'type': 'text',
+        'value': _value,
+        'help': _help,
+        'addons': addons,
+    }) }}
+
+    <div class="app-directory-browser is-hidden has-margin-bottom-medium has-padding-small textarea" style="height: 16.9rem; overflow-y: auto">
+        <!-- added by ajax -->
+    </div>
+</div>

@@ -1,0 +1,25 @@
+{% import "macros/macros.twig" as macros %}
+{% import "macros/forms.twig" as forms %}
+
+<div class="buttons is-right has-margin-top-small has-margin-bottom-none app-scroll-table-container-buttons" style="display: none">
+    {{ forms.button({
+        'icon': 'fas fa-angle-double-left',
+        'type': 'button',
+        'class': 'app-scroll-table-container-start',
+    }) }}
+    {{ forms.button({
+        'icon': 'fas fa-angle-left',
+        'type': 'button',
+        'class': 'app-scroll-table-container-left',
+    }) }}
+    {{ forms.button({
+        'icon': 'fas fa-angle-right',
+        'type': 'button',
+        'class': 'app-scroll-table-container-right',
+    }) }}
+    {{ forms.button({
+        'icon': 'fas fa-angle-double-right',
+        'type': 'button',
+        'class': 'app-scroll-table-container-end',
+    }) }}
+</div>

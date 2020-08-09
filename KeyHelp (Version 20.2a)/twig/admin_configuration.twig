@@ -1,0 +1,30 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block content %}
+
+    <div class="columns is-multiline">
+        {% for category in settings_navigation %}
+            <div class="column is-6-tablet is-6-desktop is-4-widescreen is-4-fullhd">
+                {% include 'includes/card_start_stacked.twig' with { '_label': category.label, '_icon': category.icon } %}
+                    {% for item in category.items %}
+                        {% if not item.hide %}
+                            <div>
+                                <small>
+                                    <span class="icon is-medium has-text-grey-light">
+                                        <i class="fas fa-angle-right"></i>
+                                    </span>
+                                </small>
+                                <a href="{{ item.url }}">
+                                    {{ item.label }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% include 'includes/card_end_stacked.twig' %}
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
