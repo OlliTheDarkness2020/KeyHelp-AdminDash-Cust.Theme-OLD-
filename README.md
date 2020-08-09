@@ -1,51 +1,69 @@
-# KeyHelp-AdminDash-Cust.Theme
 KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
-Änderungen 05.08.2020 (Version 1.2.1)
+<h2><b><u>Änderungen 05.08.2020 (Version 1.2.1)</u></b></h2>
 
-GIT:
->-< Keine Änderungen
+<b>GIT</b>
+<ul>
+  <li> Keine Änderungen </li>
+</ul>
 
-Dash Panel:
->-< Vollständige Umstrukturierung und Optimierungen des Codes durchgeführt.
+<br><br>
 
->-< Alle Bereiche nutzen nun eine eigene Box. (BLOCK)
+<b>Dash Panel</b>
+<ul>
+<li>Vollständige Umstrukturierung und Optimierungen des Codes durchgeführt.</li>
 
->-< NEU: Speicherplatz Anzeige , Steuerung via setinng.php.
+<li>Alle Bereiche nutzen nun eine eigene Box. (BLOCK)</li>
 
->-< NEU: START / STOPP von TeamSpeak Instanzen.
+<li><b>NEU</b> Speicherplatz Anzeige , Steuerung via setinng.php.</li>
 
->-< Blockanzeige via JSON auf Basis der Style Option Display none / block.
+<li><b>NEU</b> START / STOPP von TeamSpeak Instanzen.
 
-<b> WICHTIG </b>
+<li>Blockanzeige via JSON auf Basis der Style Option Display none / block.</li>
+</ul>
 
-BITTE DIE NEUE setting.php benutzen !
+<br>
 
+<b> <u>WICHTIG</u> </b>
 
+<b>BITTE DIE NEUE setting.php benutzen !</b>
 
+<br>
+<hr>
+<br>
 
+<h2><b><u>Änderungen 30.07.2020 (Version 1.2.0)</h2></b></u>
 
-Änderungen 30.07.2020 (Version 1.2.0)
+<b>GIT</b>
+<ul>
+<li>Struktur geändert > Teilung nach Panel Version.</li>
+</ul>
 
-GIT:
->-< Struktur geändert > Teilung nach Panel Version
+<br><br>
 
-Dash Panel:
->-< Upgrade von 20.1 auf 20.2.
+<b>Dash Panel</b>
+<ul>
+<li>Upgrade von 20.1 auf 20.2.</li>
 
->-< Änderung für pucheck & elcheck (Bitte Hinweiß in der settings.php.dist beachten)
+<li>Änderung für pucheck & elcheck (<u>Bitte Hinweiß in der settings.php.dist beachten</u>)</li>
 
->-< Optimierungen am Code.
+<li>Optimierungen am Code.</li>
+</ul>
 
+<h1>Credits (Bezogen auf den Edit)</h1>
+<ul>
+<li> OlliTheDarkness (Hauptentwickler) </li>
+<li> MoritzJuergensen (Unterstützender Entwickler) </li>
+<li> KeyHelp Community (Ideenbringer) </li>
+</ul>
 
-Credits (Bezogen auf den Edit):
-OlliTheDarkness (Hauptentwickler)
-MoritzJuergensen (Unterstützender Entwickler)
-KeyHelp Community (Ideenbringer)
+<br><br>
 
+<h1> Hauptentwickler des Panels </h2>>
+  <li> KEYWEB AG (www.KeyWeb.de) - Community (community.keyhelp.de) </li>
 
-Hauptentwickler des Panels:
-KEYWEB AG (www.KeyWeb.de) - Community (community.keyhelp.de)
+<br><br>
 
-!! ACHTUNG !!
-Die KeyWeb AG steht mit diesem Projekt in keinem Zusammenhang, die Entwicklung erfolgt frei und ausschließlich durch die Community.
+<b> !! ACHTUNG !!
+  <br>
+Die KeyWeb AG steht mit diesem Projekt in keinem Zusammenhang, die Entwicklung erfolgt frei und ausschließlich durch die Community. </b>
