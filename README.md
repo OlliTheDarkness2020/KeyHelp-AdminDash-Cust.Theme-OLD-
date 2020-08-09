@@ -59,7 +59,7 @@ KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
 <br><br>
 
-<h1> Hauptentwickler des Panels </h2>>
+<h1> Hauptentwickler des Panels </h2>
   <li> KEYWEB AG (www.KeyWeb.de) - Community (community.keyhelp.de) </li>
 
 <br><br>
