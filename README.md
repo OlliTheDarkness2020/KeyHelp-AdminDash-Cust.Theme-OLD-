@@ -4,7 +4,7 @@ KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
 <b>GIT</b>
 <ul>
-  <li> neuer Ordner "KeyHelp (Version 20.2a)" </li>
+  <li> Neuer Ordner "KeyHelp (Version 20.2a)" angelegt. </li>
 </ul>
 
 <br><br>
@@ -13,17 +13,15 @@ KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 <ul>
 <li>Start Icon für TS3 ausgetauscht</li>
 
-<li>Position und Anzeigedauer "Start / Stop Message" TS3 angepasst</li>
+<li>Position und Anzeigedauer "Start / Stop Message" TS3 angepasst.</li>
 
-<li>Datum / Uhrzeit unter jedem Block angepasst (neu rechts unten)</li>
-
-<li>TS3 Prüflogik angepasst (neu werden TS3 Server die komplett offline sind auch entsprechend angezeigt</li>
+<li><b>NEU</b> TS3 Prüflogik angepasst. (TS3 Server die komplett offline sind, werden auch entsprechend angezeigt)</li>
 
 <li>TS3 Abfrageintervall auf 10 Sekunden hochgesetzt</li>
 
 <li>News Block kann neu auch deaktiviert werden in der setting.php</li>
 
-<li>Datum / Uhrzeit unter jedem Block angepasst (neu rechts unten)</li>
+<li><b>NEU</b> Datum / Uhrzeit unter jedem Block angepasst (Rechts unten)</li>
 
 <li>allg. Codeoptimierungen</li>
 
