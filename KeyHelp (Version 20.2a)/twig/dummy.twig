@@ -1,0 +1,261 @@
+{% extends 'base/intern.twig' %}
+
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    <p class="has-margin-bottom-large">
+        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+        At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+        At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+    </p>
+
+{#######################################################################################################################
+    Top
+#######################################################################################################################}
+
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                {{ forms.button({
+                    'label': '__Backup starten',
+                    'style': 'primary',
+                }) }}
+            </div>
+        </div>
+    </div>
+
+    {% include 'includes/card_start_stacked.twig' with { '_label': '__Zuletzt duchgeführe Backups', '_icon': 'fas fa-tasks' } %}
+
+        {% if _________ is empty %}
+            <div class="has-text-centered has-text-grey">
+                - {{ no_items_available }} -
+            </div>
+        {% else %}
+            {% include 'includes/scroll_table_container_buttons.twig' %}
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped is-hoverable has-valigned-cells">
+                    <thead>
+                        <tr>
+                            <th>__</th>
+                            <th>__</th>
+                            <th>__Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="42" class="has-text-grey-light">
+                                {{ __________|length }} {{ items_total }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        {% endif %}
+
+    {% include 'includes/card_end_stacked.twig' %}
+
+    {# Spacer #}
+    <div class="has-margin-bottom-large"></div>
+
+{#######################################################################################################################
+    Bottom
+#######################################################################################################################}
+
+    <div class="columns">
+
+        {###############################################################################################################
+            Left side / Scheduled backups
+        ###############################################################################################################}
+
+            <div class="column is-half">
+                {% include 'includes/card_start_stacked.twig' with { '_label': scheduled_backups, '_icon': 'fas fa-clock', '_has_equal_height': true } %}
+
+                    {% include 'includes/index_page_button_line.twig' with ({
+                        '_add_btn_url': '?page=' ~ _app.page ~ '&action=scheduled_add',
+                        '_form_id': 'form-scheduled-backups-index'
+                    }) %}
+
+                    {% if _scheduled_backups is empty %}
+                        <div class="has-text-centered has-text-grey">
+                            - {{ no_items_available }} -
+                        </div>
+                    {% else %}
+                        {% include 'includes/scroll_table_container_buttons.twig' %}
+                        <form id="form-scheduled-backups-index" action="?page={{ _app.page }}&action=scheduled_delete" method="post">
+                            <div class="table-container">
+                                <table class="table is-fullwidth is-striped is-hoverable has-valigned-cells">
+                                    <thead>
+                                        <tr>
+                                            <th class="is-narrow">S</th>
+                                            <th>{{ schedule }}</th>
+                                            <th class="is-narrow"></th>
+                                            <th>{{ repository }}</th>
+                                            <th class="is-narrow">{{ options }}</th>
+                                            <th class="is-narrow">
+                                                <input class="app-check-all" type="checkbox">
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in _scheduled_backups %}
+                                            <tr>
+                                                <td class="has-padding-x-xsmall">
+                                                    {% include 'includes/icon.twig' with {
+                                                        '_type': item.is_enabled ? 'status_active' : 'status_inactive',
+                                                    } %}
+                                                </td>
+                                                <td class="has-no-wrap">
+                                                    {{ item.schedule }}
+                                                </td>
+                                                <td>
+                                                    {% if item.description %}
+                                                        <div class="app-tooltip-mandatory" data-tippy-content="{{ item.description|nl2br }}">
+                                                            <span class="icon has-text-grey">
+                                                                <i class="fas fa-comment-alt"></i>
+                                                            </span>
+                                                        </div>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a href="?page={{ _app.page }}&action=repo_restore&id={{ item.repo_id }}">
+                                                        {{ item.repo_name }}
+                                                    </a>
+                                                </td>
+                                                <td class="has-no-wrap">
+                                                    {% include 'includes/icon.twig' with {
+                                                        '_type': 'edit',
+                                                        '_url': '?page=' ~ _app.page ~ '&action=scheduled_edit&id=' ~ item.id
+                                                    } %}
+
+                                                    {% include 'includes/icon.twig' with {
+                                                        '_type': 'delete',
+                                                        '_url': '?page=' ~ _app.page ~ '&action=scheduled_delete&id=' ~ item.id
+                                                    } %}
+                                                </td>
+                                                <td>
+                                                    <label>
+                                                        <input type="checkbox" name="ids[]" value="{{ item.id }}">
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="42" class="has-text-grey-light">
+                                                {{ _scheduled_backups|length }} {{ items_total }}
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </form>
+                    {% endif %}
+
+                {% include 'includes/card_end_stacked.twig' %}
+            </div>
+
+        {###############################################################################################################
+            Right side / Repositories
+        ###############################################################################################################}
+
+            <div class="column is-half">
+                {% include 'includes/card_start_stacked.twig' with { '_label': repositories, '_icon': 'fas fa-box-open', '_has_equal_height': true } %}
+
+                    {% include 'includes/index_page_button_line.twig' with ({
+                        '_add_btn_url': '?page=' ~ _app.page ~ '&action=repo_add',
+                        '_form_id': 'form-repo-index'
+                    }) %}
+
+                    {% if _repositories is empty %}
+                        <div class="has-text-centered has-text-grey">
+                            - {{ no_items_available }} -
+                        </div>
+                    {% else %}
+                        {% include 'includes/scroll_table_container_buttons.twig' %}
+                        <form id="form-repo-index" action="?page={{ _app.page }}&action=repo_delete" method="post">
+                            <div class="table-container">
+                                <table class="table is-fullwidth is-striped is-hoverable has-valigned-cells">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ name }}</th>
+                                            <th>{{ repository_type }}</th>
+                                            <th>{{ size }}</th>
+                                            <th class="is-narrow">{{ options }}</th>
+                                            <th class="is-narrow">
+                                                <input class="app-check-all" type="checkbox">
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in _repositories %}
+                                            <tr>
+                                                <td>
+                                                    <a href="?page={{ _app.page }}&action=repo_restore&id={{ item.id }}">
+                                                        {{ item.name }}
+                                                    </a>
+                                                </td>
+                                                <td>{{ item.type }}</td>
+                                                <td class="has-no-wrap">{{ item.size }}</td>
+                                                <td class="is-narrow">
+                                                    {% include 'includes/icon.twig' with {
+                                                        '_type': 'edit',
+                                                        '_url': '?page=' ~ _app.page ~ '&action=repo_edit&id=' ~ item.id
+                                                    } %}
+
+                                                    {% include 'includes/icon.twig' with {
+                                                        '_type': 'restore',
+                                                        '_url': '?page=' ~ _app.page ~ '&action=repo_restore&id=' ~ item.id
+                                                    } %}
+
+                                                    {% include 'includes/icon.twig' with {
+                                                        '_type': 'delete',
+                                                        '_url': '?page=' ~ _app.page ~ '&action=repo_delete&id=' ~ item.id
+                                                    } %}
+                                                </td>
+                                                <td>
+                                                    <label>
+                                                        <input type="checkbox" name="ids[]" value="{{ item.id }}">
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="42" class="has-text-grey-light">
+                                                {{ _repositories|length }} {{ items_total }}
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </form>
+                    {% endif %}
+
+                {% include 'includes/card_end_stacked.twig' %}
+            </div>
+
+{#######################################################################################################################
+    Bottom end
+#######################################################################################################################}
+
+    </div>
+
+{% endblock %}

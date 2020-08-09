@@ -1,0 +1,29 @@
+{% apply spaceless %}
+    {#
+        Check, if one tab is explicitly set to is-active,
+        otherwise the first one will be set as is-active.
+    #}
+    {% set has_is_active = false %}
+
+    {% for item in items %}
+        {% if item.is_active %}
+            {% set has_is_active = true %}
+        {% endif %}
+    {% endfor %}
+{% endapply %}
+<div class="tabs is-centered is-boxed">
+    <ul>
+        {% for item in items %}
+            {% if not item.skip_if %}
+            <li {{ item.is_active or (loop.first and not has_is_active) ? 'class="is-active"' }}>
+                <a href="{{ item.url }}" {{ not (item.url starts with '#') ? 'data-is-link="true"' }}>
+                    {% if item.icon %}
+                        <span class="icon is-small"><i class="{{ item.icon }}" aria-hidden="true"></i></span>
+                    {% endif %}
+                    <span>{{ item.label }}</span>
+                </a>
+            </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>

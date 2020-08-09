@@ -1,0 +1,139 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    {# Intro #}
+    <p class="has-margin-bottom-large">
+        {{ help|raw }}
+    </p>
+
+    {# Button line #}
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <strong>
+                    {{ api_access }}:
+                </strong>
+            </div>
+            <div class="level-item">
+                {{ forms.button({
+                    'label': _api_enabled ? enabled : disabled,
+                    'style': _api_enabled ? 'primary' : 'grey',
+                    'url': '?page=' ~ _app.page ~ '&action=toggle_api'
+                }) }}
+            </div>
+        </div>
+    </div>
+
+    {# Button line #}
+    {% include 'includes/index_page_button_line.twig' with ({
+        '_add_btn_label': add_api_key,
+        '_add_btn_url': '?page=' ~ _app.page ~ '&action=add',
+        '_form_id': 'form-api-keys'
+    }) %}
+
+    {# Item table #}
+    <div class="card">
+        <div class="card-content">
+            {% if _api_keys is empty %}
+                <div class="has-text-centered has-text-grey">
+                    - {{ no_items_available }} -
+                </div>
+            {% else %}
+                {% include 'includes/scroll_table_container_buttons.twig' %}
+                <div class="table-container">
+                    <table class="table is-fullwidth is-striped is-hoverable has-valigned-cells">
+                        <thead>
+                            <tr>
+                                <th {% include 'includes/table_sorting.twig' with { '_column': 'name' } %}>
+                                    {{ name }}
+                                </th>
+                                <th {% include 'includes/table_sorting.twig' with { '_column': 'prefix' } %}>
+                                    {{ api_key_prefix }}
+                                </th>
+                                <th {% include 'includes/table_sorting.twig' with { '_column': 'ips_sort' } %}>
+                                    {{ ip_addresses }}
+                                </th>
+                                <th {% include 'includes/table_sorting.twig' with { '_column': 'created_at_sort' } %}>
+                                    {{ created_at }}
+                                </th>
+                                <th {% include 'includes/table_sorting.twig' with { '_column': 'last_access_sort' } %}>
+                                    {{ last_access }}
+                                </th>
+                                <th class="is-narrow">
+                                    {{ options }}
+                                </th>
+                                <th class="is-narrow">
+                                    <label>
+                                        <input class="app-check-all" type="checkbox">
+                                    </label>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <form id="form-api-keys" action="?page={{ _app.page }}&action=delete" method="post">
+                                {% for item in _api_keys %}
+                                    <tr>
+                                        <td>
+                                            {{ item.name|default('—') }}
+                                        </td>
+                                        <td>
+                                            {{ item.prefix }}
+                                        </td>
+                                        <td>
+                                            {% if item.ips is empty %}
+                                                <span class="has-text-danger has-text-weight-bold">{{ unprotected }}</span>
+                                            {% else %}
+                                                <ul>
+                                                    {% for ip in item.ips %}
+                                                        <li>{{ ip }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        </td>
+                                        <td class="has-no-wrap">
+                                            {{ item.created_at }}
+                                        </td>
+                                        <td class="has-no-wrap">
+                                            {{ item.last_access|default('—') }}
+                                        </td>
+                                        <td class="is-narrow">
+                                            {% include 'includes/icon.twig' with {
+                                                '_type': 'edit',
+                                                '_url': '?page=' ~ _app.page ~ '&action=edit&id=' ~ item.id
+                                            } %}
+
+                                            {% include 'includes/icon.twig' with {
+                                                '_type': 'delete',
+                                                '_url': '?page=' ~ _app.page ~ '&action=delete&id=' ~ item.id
+                                            } %}
+                                        </td>
+                                        <td>
+                                            {{ item.checkbox|raw }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </form>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="42" class="has-text-grey-light">
+                                    {{ _api_keys|length }} {{ items_total }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    {# Back #}
+    {% include 'includes/cta.twig' with { '_back': { 'target': 'admin_configuration' } } %}
+
+{% endblock %}

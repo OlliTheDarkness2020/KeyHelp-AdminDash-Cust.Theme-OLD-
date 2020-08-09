@@ -1,0 +1,283 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block page_scripts %}
+    <script id="app-log-entry-template" type="text/x-handlebars-template">
+		{% verbatim %}
+            <tr>
+                <td class="has-no-wrap">
+                    {{ date }}
+                </td>
+                <td class="has-no-wrap">
+                    {{ ip }}
+                </td>
+                <td>
+                    {{#if user_agent }}
+                        <span class="icon has-text-grey app-tooltip-mandatory" data-tippy-content="<b>{% endverbatim %}{{ user_agent }}{% verbatim %}</b><br>{{ user_agent }}">
+                            <i class="fas fa-user-tie"></i>
+                        </span>
+                    {{/if}}
+                </td>
+                <td>
+                    {{#if referer }}
+                        <span class="icon has-text-grey app-tooltip-mandatory" data-tippy-content="<b>{% endverbatim %}{{ referer }}{% verbatim %}</b><br>{{ referer }}">
+                            <i class="fas fa-link"></i>
+                        </span>
+                    {{/if}}
+                </td>
+                <td {{#if is_error }}class="has-text-danger"{{/ if }}>
+                    {{ status_code }}
+                </td>
+                <td {{#if is_error }}class="has-text-danger"{{/ if }}>
+                    {{ nl2br message }}
+                </td>
+            </tr>
+		{% endverbatim %}
+    </script>
+
+    <script src="/theme/bulma/assets/js/page_domain_logs.js?{{ _app.cache_control }}"></script>
+{% endblock %}
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    {# Intro #}
+    <p class="has-margin-bottom-large">
+        {{ web_server_logs_help }}
+        {{ web_server_logs_download_help }}
+
+        {% if (_log_files.access.items is not empty) or (_log_files.error.items is not empty) %}
+            <br><br>
+            {{ forms.button({
+                'label': go_to_download,
+                'style': 'primary',
+                'icon': 'fas fa-angle-double-down',
+                'class': 'is-outlined',
+                'url': '#anchor_download'
+            }) }}
+        {% endif %}
+    </p>
+
+    {# Viewing options #}
+    <div class="card has-margin-bottom-medium">
+        <div class="card-content">
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <strong>{{ viewing_options }}</strong>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item app-group-real-time-disabled">
+                        {{ forms.button({
+                            'label': start_real_time_monitoring,
+                            'icon': 'fas fa-play',
+                            'class': 'app-button-start-real-time',
+                            'type': 'button'
+                        }) }}
+                    </div>
+                    <div class="level-item app-group-real-time-disabled">
+                        {{ forms.button({
+                            'label': refresh,
+                            'icon': 'fas fa-sync-alt',
+                            'class': 'app-button-refresh',
+                            'type': 'button'
+                        }) }}
+                    </div>
+                    <div class="level-item app-group-real-time-enabled" style="display: none">
+                        {{ forms.button({
+                            'label': stop_real_time_monitoring,
+                            'icon': 'fas fa-stop',
+                            'class': 'app-button-stop-real-time',
+                            'type': 'button'
+                        }) }}
+                    </div>
+                    <div class="level-item app-group-real-time-enabled" style="display: none">
+                        {{ forms.button({
+                            'label': clear_list,
+                            'icon': 'fas fa-trash',
+                            'class': 'app-button-clear',
+                            'type': 'button'
+                        }) }}
+                    </div>
+
+                    <div class="level-right">
+                        {#
+                            Only for javascript. To access data of these checkboxes,
+                            because they are in a dynamic tooltip element.
+                        #}
+                        <input type="hidden" name="show_access_log" value="{{ _show_access_log }}">
+                        <input type="hidden" name="show_error_log" value="{{ _show_error_log }}">
+
+                        {% set _viewing_options_menu %}
+                            <form action="?page={{ _app.page }}&sid={{ _app.sid }}" method="post">
+                                <input type="hidden" name="update_view_options" value="1">
+
+                                <div class="has-text-left has-no-wrap has-padding-small">
+                                    {{ forms.checkbox_wrapped({
+                                        'options': [{
+                                            'label': access_logs,
+                                            'name': 'show_access_log',
+                                            'value': '1',
+                                            'is_checked': _show_access_log
+                                        },{
+                                            'label': error_logs,
+                                            'name': 'show_error_log',
+                                            'value': '1',
+                                            'is_checked': _show_error_log
+                                        }]
+                                    }) }}
+                                    <div class="has-text-centered">
+                                        {{ forms.button({
+                                            'label': save,
+                                            'style': 'primary',
+                                        }) }}
+                                    </div>
+                                </div>
+                            </form>
+                        {% endset %}
+
+                        <div class="app-tooltip-click" data-tippy-content="{{ _viewing_options_menu|escape('html') }}">
+                            {{ forms.button({
+                                'label': options,
+                                'icon': 'fas fa-cog',
+                                'type': 'button',
+                            }) }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Log entry table #}
+    <div class="card has-margin-bottom-medium">
+        <div class="card-content">
+
+            <div id="app-log-empty">
+                <div class="has-text-centered has-text-grey">
+                    - {{ no_items_available }} -
+                </div>
+            </div>
+
+            <div id="app-log-content-container" style="display: none">
+                {% include 'includes/scroll_table_container_buttons.twig' %}
+                <div class="table-container">
+                    <table class="table is-fullwidth is-striped is-hoverable has-valigned-cells is-narrow">
+                        <thead>
+                            <tr>
+                                <th class="is-narrow">
+                                    {{ date }}
+                                </th>
+                                <th colspan="3" class="is-narrow">
+                                    {{ client_ip }}
+                                </th>
+                                <th class="is-narrow">
+                                    {{ http_code }}
+                                </th>
+                                <th>
+                                    {{ message }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="app-log-content">
+                            <!-- added by javascript -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="42" class="has-text-grey-light"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {# Return buttons #}
+    {% include 'includes/cta.twig' with { '_back': { 'target': 'domains' } } %}
+
+    {# Download table #}
+    {% if (_log_files.access.items is not empty) or (_log_files.error.items is not empty) %}
+        <div id="anchor_download" class="columns has-margin-top-xlarge">
+
+            {% for type, log_file in _log_files %}
+                {% set _card_label = type == 'access' ? download_access_logs : download_error_logs %}
+
+                <div class="column">
+                    {% include 'includes/card_start_stacked.twig' with { '_label': _card_label, '_icon': 'fas fa-download' } %}
+
+                    {% if log_file.items is empty %}
+                        <div class="has-text-centered has-text-grey">
+                            - {{ no_items_available }} -
+                        </div>
+                    {% else %}
+                        {% include 'includes/scroll_table_container_buttons.twig' %}
+                        <div class="table-container">
+                            <table class="table is-fullwidth is-striped is-hoverable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{ filename }}
+                                        </th>
+                                        <th>
+                                            {{ modification_date }}
+                                        </th>
+                                        <th class="is-narrow">
+                                            {{ size }}
+                                        </th>
+
+                                        <th class="is-narrow">
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in log_file.items %}
+                                    <tr>
+                                        <td>
+                                            {{ item.filename }}
+                                        </td>
+                                        <td class="has-no-wrap">
+                                            {{ item.modified }}
+                                        </td>
+                                        <td class="has-no-wrap">
+                                            {{ item.size }}
+                                        </td>
+                                        <td>
+                                            {% include 'includes/icon.twig' with {
+                                                '_type': 'download',
+                                                '_url': item.download
+                                            } %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="42" class="has-text-grey-light">
+                                        {{ log_file.items|length }} {{ items_total }}
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    {% include 'includes/card_end_stacked.twig' %}
+                </div>
+            {% endfor %}
+
+        </div>
+
+        {# Return buttons #}
+        {% include 'includes/cta.twig' with { '_back': { 'target': 'domains' } } %}
+
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,16 @@
+Version:    5.55.0
+
+Releases:   https://github.com/codemirror/CodeMirror/releases
+
+Homepage:   https://codemirror.net/
+
+Update:     Download from https://codemirror.net/, due the github release does not contain lib/codemirror.js.
+
+            Update all files in mode/.
+
+            Update all files in addon/display. Update z-index of fullscreen.css to at least 9999
+
+            Minify lib/codemirror.js  -> codemirror.min.js
+            Minify lib/codemirror.css -> codemirror.min.css
+
+            Version 6 should be released soon - https://codemirror.net/6/
