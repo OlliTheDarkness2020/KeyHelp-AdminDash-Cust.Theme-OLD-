@@ -1,5 +1,37 @@
 KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
+<h2><b><u>Änderungen 09.08.2020 (Version 1.2.1a)</u></b></h2>
+
+<b>GIT</b>
+<ul>
+  <li> neuer Ordner "KeyHelp (Version 20.2a)" </li>
+</ul>
+
+<br><br>
+
+<b>Dash Panel</b>
+<ul>
+<li>Start Icon für TS3 ausgetauscht</li>
+
+<li>Position und Anzeigedauer "Start / Stop Message" TS3 angepasst</li>
+
+<li>Datum / Uhrzeit unter jedem Block angepasst (neu rechts unten)</li>
+
+<li>TS3 Prüflogik angepasst (neu werden TS3 Server die komplett offline sind auch entsprechend angezeigt</li>
+
+<li>TS3 Abfrageintervall auf 10 Sekunden hochgesetzt</li>
+
+<li>News Block kann neu auch deaktiviert werden in der setting.php</li>
+
+<li>Datum / Uhrzeit unter jedem Block angepasst (neu rechts unten)</li>
+
+<li>allg. Codeoptimierungen</li>
+
+</ul>
+<br>
+<hr>
+<br>
+
 <h2><b><u>Änderungen 05.08.2020 (Version 1.2.1)</u></b></h2>
 
 <b>GIT</b>

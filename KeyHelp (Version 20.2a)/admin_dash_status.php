@@ -3,7 +3,7 @@ include_once 'setting.php';
 
 $tsdebug = "ohno";
 
-/* Service Monitor Beginn */
+/* String Funktion Beginn */
 function get_string_between($string, $start, $end){
     $string = ' ' . $string;
     $ini = strpos($string, $start);
@@ -12,7 +12,7 @@ function get_string_between($string, $start, $end){
     $len = strpos($string, $end, $ini) - $ini;
     return substr($string, $ini, $len);
 }
-/* Service Monitor Ende */
+/* String Funktion Ende */
 
 $blockfile = 	array(
 								'block_news' => $block_news,
