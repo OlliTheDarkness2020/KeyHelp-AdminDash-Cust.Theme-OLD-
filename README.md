@@ -1,6 +1,34 @@
 KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
-<h2><b><u>Änderungen 09.08.2020 (Version 1.2.1a)</u></b></h2>
+<h2><b><u>(Dev-Version) Änderungen 10.08.2020 (Version 1.2.2Dev)</u></b></h2>
+
+<b>GIT</b>
+<ul>
+  <li> Ordner "KeyHelp (Version 20.2a)" zu "KeyHelp (Version 20.2-Dev)" geändert. </li>
+</ul>
+
+<br><br>
+
+<b>Dash Panel</b>
+<ul>
+<li> Alle Boxen auf dem Dash mit IDs belegt. </li>
+
+<li> Alle Boxen auf dem Dash inkl. aller KeyHelp Boxen nun An- bzw. Abschaltbar in der setting.php. </li>
+
+<li> Prüfung auf Existenz der BlockIDs eingebaut. </li>
+
+<li> Copyright am Ende des Dash Boards gesetzt. </li>
+
+<li> Alle Dashboard Boxen Ein- bzw. Ausklappbar durch klick auf den Namen. </li>
+
+<li> Allgemeine, kleine Änderungen. </li>
+
+</ul>
+<br>
+<hr>
+<br>
+
+<h2><b><u>(Dev-Version) Änderungen 09.08.2020 (Version 1.2.2a)</u></b></h2>
 
 <b>GIT</b>
 <ul>
@@ -30,7 +58,7 @@ KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 <hr>
 <br>
 
-<h2><b><u>Änderungen 05.08.2020 (Version 1.2.1)</u></b></h2>
+<h2><b><u>(Release-Version) Änderungen 05.08.2020 (Version 1.2.1)</u></b></h2>
 
 <b>GIT</b>
 <ul>
@@ -62,7 +90,7 @@ KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 <hr>
 <br>
 
-<h2><b><u>Änderungen 30.07.2020 (Version 1.2.0)</h2></b></u>
+<h2><b><u>(Release-Version) Änderungen 30.07.2020 (Version 1.2.0)</h2></b></u>
 
 <b>GIT</b>
 <ul>

@@ -27,7 +27,7 @@ window.onload = getBlockStat();
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Sleeper
+// OTD Sleeper
 //----------------------------------------------------------------------------------------------------------------------
 
 function Sleeper(milliseconds) {
@@ -94,18 +94,77 @@ function getXmlHttpRequestObject(aw)
                   if (response[prop] === 'true')
                     {
                       console.debug('Bereich: '+prop+' ist als TRUE erkannt !');
-                      document.getElementById(prop+'_Div').style.display = "block";
-                     }
+                      var blockdiv  = document.getElementById(prop+'_Div');
+                      if (blockdiv)
+                        {
+                          console.debug('Bereich '+prop+' - DivID gefunden - SET durchgeführt !');
+                          document.getElementById(prop+'_Div').style.display = "block";
+                        }
+                      else
+                        {
+                         console.debug('Bereich '+prop+' - DivID nicht gefunden - SET Übersprungen !');
+                        }
+                      }
                    else
                      {
                        console.debug('Bereich: '+prop+' ist als FALSE erkannt !');
-                       document.getElementById(prop+'_Div').style.display = "none";
+                       var blockdiv  = document.getElementById(prop+'_Div');
+                       if (blockdiv)
+                         {
+                           console.debug('Bereich '+prop+' - DivID gefunden - SET durchgeführt !');
+                           document.getElementById(prop+'_Div').style.display = "block";
+                         }
+                       else
+                         {
+                          console.debug('Bereich '+prop+' - DivID nicht gefunden - SET Übersprungen !');
+                         }
                      }
                   console.debug('Variable wurde gesetzt !');
                 }
             console.debug('(Funktion) setBlockMessage (Blocksystem) abgeschlossen. ');
           }
       };
+
+
+//======================================================================================================================
+// OTD Boxen Ein- bzw. Ausklappen
+//======================================================================================================================
+
+    $('.card-header').on('click', function() {
+        var $this = $(this);
+        var $arrowIcon = $this.find('.app-menu-arrow i');
+        var $menuList = $this.parent().find('.card-content');
+
+        $this.toggleClass('app-is-collapsed');
+        $arrowIcon.toggleClass('fa-angle-right');
+        $arrowIcon.toggleClass('fa-angle-down');
+        $menuList.toggle(250);
+    });
+
+	function toggleDialog() {
+		var dialog = document.querySelector('dialog'),
+			closeButton = document.getElementById('close-dialog');
+		if (!dialog.hasAttribute('open')) {
+			dialog.setAttribute('open', 'open');
+			closeButton.focus();
+			closeButton.addEventListener('click', toggleDialog);
+			document.addEventListener('keydown', function (event) {
+				if (event.keyCode == 27) {
+					toggleDialog();
+				}
+			}, true);
+			var div = document.createElement('div');
+			div.id = 'backdrop';
+			document.body.appendChild(div);
+		} else {
+			dialog.removeAttribute('open');
+			var div = document.querySelector('#backdrop');
+			div.parentNode.removeChild(div);
+			lastFocus.focus();
+		}
+};
+
+$('column .card-header.app-is-collapsed').trigger('click');
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -162,6 +221,22 @@ function getXmlHttpRequestObject(aw)
 
      ServiceAbfrage();
      setInterval(ServiceAbfrage, 5000);
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// OTD Rückmeldung zur Version
+//----------------------------------------------------------------------------------------------------------------------
+
+     var DashVersion = $("#DashVersion");
+     function VersionAbfrage(){
+       console.debug('(Version) Abfrage ausgelöst ! ');
+         $.post('theme/otd/admin_dash_status.php?realtime=dashversion', {
+         }, function(VersionData){
+            $(DashVersion).html(VersionData);
+         });
+     };
+
+     VersionAbfrage();
 
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -12,15 +12,26 @@ Datenschutzhinweiß für Funktion $pucheck und $elcheck:
 	Diese Informationen werden in der Regel nicht gespeichert.
 	Sollte aus technisch notwendigen Gründen eine Speicherung erfolgen, wird diese nach max. 48 Stunden gelöscht.
 	Eine Weitergabe bzw. eine weitere Verarbeitung erfolgt durch 136.243.88.171 nicht.
+!! ACHTUNG !!
+	Für diese Funktionen (pucheck & elcheck) benötigen Sie Zugangsdaten.
+	Um diese zu erhalten , wenden Sie sich per PM im KeyHelp an OlliTheDarkness
 */
 
-/*	Block Aktivierung	*/
-	$block_news 		= 'true';
-	$block_service 		= 'true';
-	$block_teamspeak 	= 'true';
-	$block_smart	 	= 'true';
-	$block_raid	 		= 'true';
-	$block_diskspace	= 'true';
+/*	Custom Block Anzeige Aktivierung	(true)	/ Deaktivierung (false) */
+
+	$block_service 		= 'true';			// Service / Port Status
+	$block_teamspeak 	= 'true';			// TeamSpeak Status
+	$block_smart	 		= 'true';			// S.M.A.R.T Status
+	$block_raid	 			= 'true';			// RAID Status
+	$block_diskspace	= 'true';			// Speicherplatz Status
+
+/*	KeyHelp Block Anzeige Aktivierung (true)	/ Deaktivierung (false) */
+
+	$block_news 				= 'true';		// News Block
+	$block_notes 				= 'true';		// Notiz Block
+	$block_applications	=	'true';		// Anwendungen Block
+	$block_resources		=	'true';		// Ressourcen Block
+	$block_server				=	'true';		// Server Block
 
 /*	>>Service Status Konfiguration<<	*/
 
