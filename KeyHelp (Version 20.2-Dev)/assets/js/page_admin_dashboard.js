@@ -41,7 +41,7 @@ function Sleeper(milliseconds) {
 
 function getXmlHttpRequestObject(aw)
   {
-    console.debug('(Request) Funktion ausgelöst von '+aw+' ! ');
+    console.debug('%c(Funktion) Request ausgelöst von '+aw+' !','background: green; color: white;');
     if(window.XMLHttpRequest)
       {
         return new XMLHttpRequest();
@@ -54,6 +54,7 @@ function getXmlHttpRequestObject(aw)
       {
         alert('Ajax funktioniert bei Ihnen nicht !');
       }
+    console.debug('%c(Funktion) Request von '+aw+' abgeschlossen !','background: green; color: white;');
   };
 
 
@@ -63,7 +64,7 @@ function getXmlHttpRequestObject(aw)
 
     function getBlockStat()
       {
-        console.debug('(Funktion) getBlockStat (Blocksystem) ausgelöst. ');
+        console.debug('%c(Funktion) getBlockStat (Blocksystem) ausgelöst.','background: green; color: white;');
         if(blockreq.readyState == 4 || blockreq.readyState == 0)
           {
             console.debug('(Blocksystem) JSON Abfrage gesendet ... ');
@@ -76,52 +77,53 @@ function getXmlHttpRequestObject(aw)
           }
         else
           {
-            console.debug('(Blocksystem) Upps, da ging was schief ... ');
+            console.debug('%c(Blocksystem) Upps, da ging was schief ... ','background: red; color: white;');
           }
+        console.debug('%c(Funktion) getBlockStat (Blocksystem) abgeschlossen.','background: green; color: white;');
       };
 
     function setBlockMessage()
       {
-        console.debug('(Funktion) setBlockMessage (Blocksystem) ausgelöst. ');
+        console.debug('%c(Funktion) setBlockMessage (Blocksystem) ausgelöst.','background: green; color: white;');
         if(blockreq.readyState == 4)
           {
-            console.debug('(Funktion) setBlockMessage (Blocksystem) Ergebnis empfangen. ');
+            console.debug('%c(Funktion) setBlockMessage (Blocksystem) Ergebnis empfangen.','background: green; color: white;');
             var response = eval('(' + blockreq.responseText+ ')');
               for (var prop in response)
                 {
-                  console.debug('Setze Variable: Bereich: '+prop+' = '+response[prop]+'');
+                  console.debug('%cSetze Variable: Bereich: '+prop+' = '+response[prop]+'.','background: green; color: white;');
 
                   if (response[prop] === 'true')
                     {
-                      console.debug('Bereich: '+prop+' ist als TRUE erkannt !');
+                      console.debug('%cBereich: '+prop+' ist als TRUE erkannt !','background: green; color: white;');
                       var blockdiv  = document.getElementById(prop+'_Div');
                       if (blockdiv)
                         {
-                          console.debug('Bereich '+prop+' - DivID gefunden - SET durchgeführt !');
+                          console.debug('%cBereich '+prop+' - DivID gefunden - SET durchgeführt !','background: green; color: white;');
                           document.getElementById(prop+'_Div').style.display = "block";
                         }
                       else
                         {
-                         console.debug('Bereich '+prop+' - DivID nicht gefunden - SET Übersprungen !');
+                         console.debug('%cBereich '+prop+' - DivID nicht gefunden - SET Übersprungen !','background: yellow; color: black;');
                         }
                       }
                    else
                      {
-                       console.debug('Bereich: '+prop+' ist als FALSE erkannt !');
+                       console.debug('%cBereich: '+prop+' ist als FALSE erkannt !','background: green; color: white;');
                        var blockdiv  = document.getElementById(prop+'_Div');
                        if (blockdiv)
                          {
-                           console.debug('Bereich '+prop+' - DivID gefunden - SET durchgeführt !');
-                           document.getElementById(prop+'_Div').style.display = "block";
+                           console.debug('%cBereich '+prop+' - DivID gefunden - SET durchgeführt !','background: green; color: white;');
+                           document.getElementById(prop+'_Div').style.display = "none";
                          }
                        else
                          {
-                          console.debug('Bereich '+prop+' - DivID nicht gefunden - SET Übersprungen !');
+                          console.debug('%cBereich '+prop+' - DivID nicht gefunden - SET Übersprungen !','background: yellow; color: black;');
                          }
                      }
-                  console.debug('Variable wurde gesetzt !');
+                  console.debug('Variable '+prop+'='+response[prop]+' wurde gesetzt.');
                 }
-            console.debug('(Funktion) setBlockMessage (Blocksystem) abgeschlossen. ');
+            console.debug('%c(Funktion) setBlockMessage (Blocksystem) abgeschlossen.','background: green; color: white;');
           }
       };
 
@@ -173,19 +175,19 @@ $('column .card-header.app-is-collapsed').trigger('click');
 
     function getStat(control, tsp, tskey)
       {
-        console.debug('(Funktion) getStat (TS3 CCS) ausgelöst. ');
+        console.debug('%c(Funktion) getStat (TS3 CCS) ausgelöst.','background: green; color: white;');
         if(req.readyState == 4 || req.readyState == 0)
           {
-            console.debug('(Funktion) getStat (TS3 CCS) Anfrage ... ');
+            console.debug('%c(Funktion) getStat (TS3 CCS) Anfrage ...','background: green; color: white;');
             req.open('GET', 'theme/otd/admin_dash_status.php?realtime=teamspeak3_controller&tscontrol='+control+'&tsp='+tsp+'&tskey='+tskey, true);
             req.setRequestHeader("Content-Type","text/plain");
-            console.debug('(Funktion) getStat (TS3 CCS) Anfrage ausgeführt ! ');
+            console.debug('%c(Funktion) getStat (TS3 CCS) Anfrage ausgeführt !','background: green; color: white;');
             req.onreadystatechange = setMessage;
             req.send(null);
           }
         else
           {
-            console.debug('(Funktion) getStat (TS3 CCS) Anfrage fehlerhaft, abgebrochen ! ');
+            console.debug('%c(Funktion) getStat (TS3 CCS) Anfrage fehlerhaft, abgebrochen !','background: red; color: white;');
             document.getElementById('ts3stat').innerHTML = 'Upps, da ging was schief ...';
             console.warn(request.statusText, request.responseText);
           }
@@ -193,15 +195,19 @@ $('column .card-header.app-is-collapsed').trigger('click');
 
     async function setMessage()
       {
-        console.debug('(Funktion) setMessage (TS3 CCS) ausgelöst. ');
+        console.debug('%c(Funktion) setMessage (TS3 CCS) ausgelöst.','background: green; color: white;');
         if(req.readyState == 4)
           {
-            console.debug('(Funktion) setMessage (TS3 CCS) Ergebnis auswerten ...');
+            console.debug('%c(Funktion) setMessage (TS3 CCS) Ergebnis auswerten ...','background: green; color: white;');
             var response = eval('(' + req.responseText+ ')');
             document.getElementById('ts3stat').innerHTML = response.servinst;
-            console.debug('(Funktion) setMessage (TS3 CCS) Ergebnis OK. ');
+            console.debug('%c(Funktion) setMessage (TS3 CCS) Ergebnis OK.','background: green; color: white;');
             await Sleeper(5000);
             document.getElementById('ts3stat').innerHTML = '';
+          }
+        else
+          {
+            console.debug('%c(Funktion) setMessage (TS3 CCS) Ergebnis fehlerhaft !','background: red; color: white;');
           }
       };
 
@@ -212,7 +218,7 @@ $('column .card-header.app-is-collapsed').trigger('click');
 
      var ServiceDiv = $("#Service");
      function ServiceAbfrage(){
-       console.debug('(Service Box) Intervalabfrage ausgelöst ! ');
+       console.debug('(Service Box) Intervalabfrage ausgelöst.');
          $.post('theme/otd/admin_dash_status.php?realtime=service', {
          }, function(ServiceData){
             $(ServiceDiv).html(ServiceData);
@@ -229,7 +235,7 @@ $('column .card-header.app-is-collapsed').trigger('click');
 
      var DashVersion = $("#DashVersion");
      function VersionAbfrage(){
-       console.debug('(Version) Abfrage ausgelöst ! ');
+       console.debug('(Version) Abfrage ausgelöst.');
          $.post('theme/otd/admin_dash_status.php?realtime=dashversion', {
          }, function(VersionData){
             $(DashVersion).html(VersionData);
@@ -245,7 +251,7 @@ $('column .card-header.app-is-collapsed').trigger('click');
 
      var RaidDiv = $("#Raid");
      function RaidAbfrage(){
-       console.debug('(Raid Box) Abfrage ausgelöst ! ');
+       console.debug('(Raid Box) Abfrage ausgelöst.');
          $.post('theme/otd/admin_dash_status.php?realtime=raid', {
          }, function(RaidData){
             $(RaidDiv).html(RaidData);
@@ -261,7 +267,7 @@ $('column .card-header.app-is-collapsed').trigger('click');
 
     var SmartDiv = $("#Smart");
     function SmartAbfrage(){
-      console.debug('(S.M.A.R.T Box) Abfrage ausgelöst ! ');
+      console.debug('(S.M.A.R.T Box) Abfrage ausgelöst.');
         $.post('theme/otd/admin_dash_status.php?realtime=smart', {
         }, function(SmartData){
            $(SmartDiv).html(SmartData);
@@ -277,7 +283,7 @@ $('column .card-header.app-is-collapsed').trigger('click');
 
      var TeamSpeak3Div = $("#TeamSpeak3");
      function TeamSpeakAbfrage(){
-       console.debug('TeamSpeak3 Box Intervalabfrage ausgelöst !');
+       console.debug('TeamSpeak3 Box Intervalabfrage ausgelöst.');
           $.post('theme/otd/admin_dash_status.php?realtime=teamspeak3', {
          }, async function(data){
             $(TeamSpeak3Div).html(data);
@@ -294,7 +300,7 @@ $('column .card-header.app-is-collapsed').trigger('click');
 
     var DiskspaceDiv = $("#Diskspace");
     function DiskspaceAbfrage(){
-      console.debug('(Diskspace Box) Abfrage ausgelöst ! ');
+      console.debug('(Diskspace Box) Abfrage ausgelöst.');
         $.post('theme/otd/admin_dash_status.php?realtime=diskspace', {
         }, function(DiskspaceData){
            $(DiskspaceDiv).html(DiskspaceData);
