@@ -1,7 +1,0 @@
-{
-    "name": "OTD - KeyHelp Theme (Dash mit Status)",
-    "description": "KeyHelp Theme mit Status Service / TeamSpeak / S.M.A.R.T / RAID Anzeige",
-    "author": "Alexander Mahr (Edit: OlliTheDarkness)",
-    "version": "20.1",
-    "path_to_templates": "twig\/"
-}
