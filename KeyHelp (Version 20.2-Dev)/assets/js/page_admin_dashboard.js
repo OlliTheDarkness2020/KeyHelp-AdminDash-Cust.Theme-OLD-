@@ -22,7 +22,6 @@ debug(true);
 
 var blockreq = getXmlHttpRequestObject('Blocksystem');
 var req = getXmlHttpRequestObject('TS3 CCS');
-
 window.onload = getBlockStat();
 
 
@@ -74,6 +73,15 @@ function getXmlHttpRequestObject(aw)
             console.debug('(Blocksystem) JSON Abfrage, erwarte Ergebnis ... ');
             // await Sleeper(5000);
             blockreq.send(null);
+
+            /* catch (e)
+              {
+                console.debug(e);
+                document.getElementById('block_error_Div').style.display = "block";
+                document.getElementById('otd-error_msg').innerHTML += e;
+
+              }
+              */
           }
         else
           {
@@ -87,43 +95,68 @@ function getXmlHttpRequestObject(aw)
         console.debug('%c(Funktion) setBlockMessage (Blocksystem) ausgelöst.','background: green; color: white;');
         if(blockreq.readyState == 4)
           {
-            console.debug('%c(Funktion) setBlockMessage (Blocksystem) Ergebnis empfangen.','background: green; color: white;');
-            var response = eval('(' + blockreq.responseText+ ')');
-              for (var prop in response)
-                {
-                  console.debug('%cSetze Variable: Bereich: '+prop+' = '+response[prop]+'.','background: green; color: white;');
-
-                  if (response[prop] === 'true')
+            try
+              {
+                console.debug('%c(Funktion) setBlockMessage (Blocksystem) Ergebnis empfangen.','background: green; color: white;');
+                var response = eval('(' + blockreq.responseText+ ')');
+                  for (var prop in response)
                     {
-                      console.debug('%cBereich: '+prop+' ist als TRUE erkannt !','background: green; color: white;');
-                      var blockdiv  = document.getElementById(prop+'_Div');
-                      if (blockdiv)
+                      console.debug('%cSetze Variable: Bereich: '+prop+' = '+response[prop]+'.','background: green; color: white;');
+
+                      if (response[prop] === 'true')
                         {
-                          console.debug('%cBereich '+prop+' - DivID gefunden - SET durchgeführt !','background: green; color: white;');
-                          document.getElementById(prop+'_Div').style.display = "block";
-                        }
-                      else
-                        {
-                         console.debug('%cBereich '+prop+' - DivID nicht gefunden - SET Übersprungen !','background: yellow; color: black;');
-                        }
-                      }
-                   else
-                     {
-                       console.debug('%cBereich: '+prop+' ist als FALSE erkannt !','background: green; color: white;');
-                       var blockdiv  = document.getElementById(prop+'_Div');
-                       if (blockdiv)
-                         {
-                           console.debug('%cBereich '+prop+' - DivID gefunden - SET durchgeführt !','background: green; color: white;');
-                           document.getElementById(prop+'_Div').style.display = "none";
-                         }
+                          console.debug('%cBereich: '+prop+' ist als TRUE erkannt !','background: green; color: white;');
+                            if (prop === 'block_teamspeak')
+                              {
+                                setInterval(TeamSpeakAbfrage, 10000);
+                              }
+                            if (prop === 'block_service')
+                              {
+                                setInterval(ServiceAbfrage, 5000);
+                              }
+                          var blockdiv  = document.getElementById(prop+'_Div');
+                          if (blockdiv)
+                            {
+                              console.debug('%cBereich '+prop+' - DivID gefunden - SET durchgeführt !','background: green; color: white;');
+                              document.getElementById(prop+'_Div').style.display = "block";
+                            }
+                          else
+                            {
+                             console.debug('%cBereich '+prop+' - DivID nicht gefunden - SET Übersprungen !','background: yellow; color: black;');
+                            }
+                          }
                        else
                          {
-                          console.debug('%cBereich '+prop+' - DivID nicht gefunden - SET Übersprungen !','background: yellow; color: black;');
+                           console.debug('%cBereich: '+prop+' ist als FALSE erkannt !','background: green; color: white;');
+                           var blockdiv  = document.getElementById(prop+'_Div');
+                           if (blockdiv)
+                             {
+                               console.debug('%cBereich '+prop+' - DivID gefunden - SET durchgeführt !','background: green; color: white;');
+                               document.getElementById(prop+'_Div').style.display = "none";
+                             }
+                           else
+                             {
+                              console.debug('%cBereich '+prop+' - DivID nicht gefunden - SET Übersprungen !','background: yellow; color: black;');
+                             }
                          }
-                     }
-                  console.debug('Variable '+prop+'='+response[prop]+' wurde gesetzt.');
-                }
-            console.debug('%c(Funktion) setBlockMessage (Blocksystem) abgeschlossen.','background: green; color: white;');
+                      console.debug('Variable '+prop+'='+response[prop]+' wurde gesetzt.');
+                    }
+                console.debug('%c(Funktion) setBlockMessage (Blocksystem) abgeschlossen.','background: green; color: white;');
+              }
+            catch (e)
+              {
+                console.debug(e);
+                if (e == "SyntaxError: expected expression, got '<'")
+                  {
+                    document.getElementById('block_error_Div').style.display = "block";
+                    document.getElementById('otd-error_msg').innerHTML += ('<b> <font color="RED"> Die JSON Datei wurde nicht gefunden ! </font> <br /> Überprüfen Sie ob der otd Ordner ausreichende Rechte (755) besitzt. </b> <br /> Tritt der Fehler weiterhin auf, klicken Sie auf das Copyright um zu erfahren wie Sie den Entwickler kontaktieren können.');
+                  }
+                else
+                  {
+                    document.getElementById('block_error_Div').style.display = "block";
+                    document.getElementById('otd-error_msg').innerHTML += ('<b> <font color="RED"> Unbekannter Fehler festgestellt ! </font> <br /> Aktualisieren Sie bitte die Seite (F5 Taste). </b> <br /> Tritt der Fehler weiterhin auf, klicken Sie auf das Copyright um zu erfahren wie Sie den Entwickler kontaktieren können.');
+                  }
+              }
           }
       };
 
@@ -226,7 +259,6 @@ $('column .card-header.app-is-collapsed').trigger('click');
      };
 
      ServiceAbfrage();
-     setInterval(ServiceAbfrage, 5000);
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -291,7 +323,6 @@ $('column .card-header.app-is-collapsed').trigger('click');
      };
 
      TeamSpeakAbfrage();
-     setInterval(TeamSpeakAbfrage, 10000);
 
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,30 @@
 KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
+<h2><b><u>(Dev-Version) Änderungen 13.08.2020 (Version 1.2.3Dev)</u></b></h2>
+
+<b>GIT</b>
+<ul>
+  <li> - </li>
+</ul>
+
+<br><br>
+
+<b>Dash Panel</b>
+<ul>
+
+<li> Fehlerausgabe bei fehlenden Schreibrechten auf dem Theme Ordner. </li>
+
+<li> Optimierung für block_setting.json. Wird nun nur noch erstellt wenn "Nicht vorhanden" oder "Älter als setting.php". </li>
+
+<li> Wenn "block_teamspeak" oder "block_service" abgeschaltet (false) sind, erfolgt kein ständiger Aufruf mehr. </li>
+
+<li> Zusätzliche Box hinzugefügt welche bei Fehlern auf AKTIV schaltet und den aufgetretenen Fehler sowie ggf. dessen Behebung anzeigt. </li>
+
+</ul>
+<br>
+<hr>
+<br>
+
 <h2><b><u>(Dev-Version) Änderungen 10.08.2020 (Version 1.2.2Dev)</u></b></h2>
 
 <b>GIT</b>

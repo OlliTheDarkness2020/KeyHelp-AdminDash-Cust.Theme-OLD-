@@ -40,6 +40,10 @@
 
 
       {# TOP #}
+          {% include 'includes/card_start_stacked_error.twig' with { '_label': 'Error Message !' , '_icon': 'far fa-newspaper'} %}
+
+          {% include 'includes/card_end_stacked.twig' %}
+
         {% if not _whitelabel.is_hide_news %}
             {% include 'includes/card_start_stacked_news.twig' with { '_label': news, '_icon': 'far fa-newspaper'} %}
                 <div id="app-news-container">

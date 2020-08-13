@@ -2,8 +2,8 @@
 
 /* Zusätzliche Einstellungen */
 
-	$pucheck		= 'false';	/* Für Panel Update Prüfung auf true setzen */
-	$elcheck		= 'false';	/* Für Entwickler Notfall Abschaltungsprüfung auf true setzen */
+	$pucheck	= 'false';	/* Für Panel Update Prüfung auf true setzen */
+	$elcheck	= 'false';	/* Für Entwickler Notfall Abschaltungsprüfung auf true setzen */
 
 /*
 Datenschutzhinweiß für Funktion $pucheck und $elcheck:
@@ -17,35 +17,39 @@ Datenschutzhinweiß für Funktion $pucheck und $elcheck:
 	Um diese zu erhalten , wenden Sie sich per PM im KeyHelp an OlliTheDarkness
 */
 
-/*	Custom Block Anzeige Aktivierung	(true)	/ Deaktivierung (false) */
+/*	Custom Block Anzeige Aktivierung (true)	/ Deaktivierung (false) */
 
-	$block_service 		= 'true';			// Service / Port Status
-	$block_teamspeak 	= 'true';			// TeamSpeak Status
-	$block_smart	 		= 'true';			// S.M.A.R.T Status
-	$block_raid	 			= 'true';			// RAID Status
-	$block_diskspace	= 'true';			// Speicherplatz Status
+	$block_service 		= 'true';		// Service / Port Status
+	$block_teamspeak 	= 'false';		// TeamSpeak Status
+	$block_smart	 	= 'false';		// S.M.A.R.T Status
+	$block_raid	 	= 'false';		// RAID Status
+	$block_diskspace	= 'true';		// Speicherplatz Status
 
-/*	KeyHelp Block Anzeige Aktivierung (true)	/ Deaktivierung (false) */
+/*	KeyHelp Block Anzeige Aktivierung (true) / Deaktivierung (false) */
 
-	$block_news 				= 'true';		// News Block
-	$block_notes 				= 'true';		// Notiz Block
-	$block_applications	=	'true';		// Anwendungen Block
-	$block_resources		=	'true';		// Ressourcen Block
-	$block_server				=	'true';		// Server Block
+	$block_news 		= 'true';		// News Block
+	$block_notes 		= 'true';		// Notiz Block
+	$block_applications	= 'true';		// Anwendungen Block
+	$block_resources	= 'true';		// Ressourcen Block
+	$block_server		= 'true';		// Server Block
 
 /*	>>Service Status Konfiguration<<	*/
 
 	$tcpserver   	= '127.0.0.1';
 	$tcpdienste  	= array('FTP', 'SSH', 'SMTP', 'HTTP', 'POP3', 'HTTPS', 'MySQL');
-	$tcpports  		= array('21', '22', '25', '80', '110', '443', '3306');
+	$tcpports  	= array('21', '22', '25', '80', '110', '443', '3306');
 
 /*	>>TeamSpeak3 Konfiguration<<	*/
 
-	$tsserver   = array('1.1.1.1');
-	$tsquery  	= array('10011');
-	$tsport  	= array('9987');
-	$tsuser		= array('serveradmin');
-	$tspass		= array('abcdefg');
+  $tsserver	= array('1.1.1.1' , '2.2.2.2');
+
+  $tsquery 	= array('10011' , '10011');
+
+  $tsport  	= array('9987' , '9987');
+
+  $tsuser	= array('serveradmin' , 'serveradmin');
+
+  $tspass	= array('KENNWORT' , 'KENNWORT');
 
 /*	>>Speicher Prüfung Konfiguration<<	*/
 /*

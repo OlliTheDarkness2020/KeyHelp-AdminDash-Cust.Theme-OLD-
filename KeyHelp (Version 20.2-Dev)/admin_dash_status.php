@@ -3,7 +3,7 @@ include_once 'setting.php';
 
 $tsdebug = "ohno";
 
-$panel_version = '1.2.2Dev';
+$panel_version = '1.2.3Dev';
 
 /* String Funktion Beginn */
 function get_string_between($string, $start, $end) {
@@ -16,11 +16,14 @@ function get_string_between($string, $start, $end) {
 }
 /* String Funktion Ende */
 
-$blockfile = array('block_news' => $block_news, 'block_server' => $block_server, 'block_resources' => $block_resources, 'block_notes' => $block_notes, 'block_applications' => $block_applications, 'block_service' => $block_service, 'block_teamspeak' => $block_teamspeak, 'block_smart' => $block_smart, 'block_raid' => $block_raid, 'block_diskspace' => $block_diskspace);
-$blockjson = json_encode($blockfile);
-$handle = fopen("setting_block.json", "w");
-fwrite($handle, $blockjson);
-fclose($handle);
+if (filemtime('setting.php') > filemtime('setting_block.json'))
+  {
+    $blockfile = array('block_news' => $block_news, 'block_server' => $block_server, 'block_resources' => $block_resources, 'block_notes' => $block_notes, 'block_applications' => $block_applications, 'block_service' => $block_service, 'block_teamspeak' => $block_teamspeak, 'block_smart' => $block_smart, 'block_raid' => $block_raid, 'block_diskspace' => $block_diskspace);
+    $blockjson = json_encode($blockfile);
+    $handle = fopen("setting_block.json", "w");
+    fwrite($handle, $blockjson);
+    fclose($handle);
+  }
 
 $stylecss = '
 		<style type="text/css">
@@ -406,7 +409,7 @@ switch ($_GET["realtime"]) {
   									<tr>
   										<td> <b> ---- </b> </td>
   										<td> <center> <h4>' . $item[0] . ':' . $item[2] . '</h4> </center> </td>
-  										<td> <center> <font color="red"> Offline </font> </center> </td>
+  										<td> <center> <font class="tab blink" color="red"> Offline </font> </center> </td>
   										<td> <center> <a onclick="getStat(\'start\', ' . $item[2] . ', \'' . $item[0] . $item[2] . '\')"> <i class="far fa fa-play-circle fa-lg"></i> </a> </center> </td>
   									</tr>
   								';
@@ -415,7 +418,7 @@ switch ($_GET["realtime"]) {
             catch(Exception $e) {
                 echo '
   							<tr>
-  								<td colspan="4"><font color="red">Hostsystem <b>' . $item[0] . ':' . $item[2] . '</b> nicht erreichbar! Bitte die Datei "setting.php" und ggf. den Host prüfen!</font></td>
+  								<td colspan="4"><font class="tab blink" color="red">Hostsystem <b>' . $item[0] . ':' . $item[2] . '</b> nicht erreichbar !</font> <br /> <font color="red"> Bitte die Datei "setting.php" und ggf. den Host prüfen !</font></td>
   							</tr>
   						';
             }
