@@ -24,6 +24,7 @@
 
     <title>{{ _app.page_title }}</title>
     <link rel="stylesheet" href="/theme/otd/assets/css/style.css?{{ _app.cache_control }}">
+    <link rel="stylesheet" href="/theme/otd/assets/css/jquery.modal.css?{{ _app.cache_control }}">
 
     {% block page_css %}{% endblock %}
 
@@ -49,6 +50,7 @@
     <script src="/theme/otd/assets/vendor/select2/select2.min.js?{{ _app.cache_control }}"></script>
     <script src="/theme/otd/assets/vendor/select2/i18n/{{ _app.language }}.js?{{ _app.cache_control }}"></script>
     <script src="/theme/otd/assets/js/functions.js?{{ _app.cache_control }}"></script>
+    <script src="/theme/otd/assets/vendor/jquery/jquery.modal.js?{{ _app.cache_control }}"></script>
     <script src="/theme/otd/assets/js/main.js?{{ _app.cache_control }}"></script>
 
     {% block page_scripts %}{% endblock %}
@@ -58,6 +60,8 @@
             {{ _whitelabel.javascript|raw }}
         </script>
     {% endif %}
+
+<div class="modal"></div>
 
 </body>
 </html>

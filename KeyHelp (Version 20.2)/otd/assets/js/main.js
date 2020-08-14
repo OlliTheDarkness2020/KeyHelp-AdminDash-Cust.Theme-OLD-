@@ -551,3 +551,19 @@
             $this.addClass('is-loading');
         }
     });
+
+//======================================================================================================================
+// OTD - AJAX Manual Modal (Datei)
+//======================================================================================================================
+
+$('#otd-ajax-modal').click(function(event) {
+  event.preventDefault();
+  this.blur(); 
+  $.get(this.href, function(html) {
+    $(html).appendTo('body').modal();
+  });
+});
+
+
+// var moda_message = $(this).data('message');
+// 	document.getElementById('modal-ausgabe').innerHTML = moda_message;

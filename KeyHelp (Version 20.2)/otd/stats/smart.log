@@ -1,0 +1,6 @@
+Festplatte : /dev/sda
+SMART overallhealth selfassessment test result: PASSED
+194 Temperature_Celsius     0x0002   176   176   000    Old_age   Always        :       34 (Min/Max 20/45)
+Festplatte : /dev/sdb
+SMART overallhealth selfassessment test result: PASSED
+194 Temperature_Celsius     0x0002   176   176   000    Old_age   Always        :       34 (Min/Max 21/47)
