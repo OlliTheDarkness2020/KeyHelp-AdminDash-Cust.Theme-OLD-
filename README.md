@@ -1,5 +1,28 @@
 KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
+<h2><b><u>(Dev-Version) Änderungen 14.08.2020 (Version 1.2.4Dev)</u></b></h2>
+
+<b>GIT</b>
+<ul>
+  <li> - </li>
+</ul>
+
+<br><br>
+
+<b>Dash Panel</b>
+<ul>
+
+<li> Box zur Temperatur Anzeige hinzugefügt. </li>
+
+<li> Code für neue Boxen angepasst. </li>
+
+<li> Kleinere Verbesserungen. </li>
+
+</ul>
+<br>
+<hr>
+<br>
+
 <h2><b><u>(Dev-Version) Änderungen 13.08.2020 (Version 1.2.3Dev)</u></b></h2>
 
 <b>GIT</b>

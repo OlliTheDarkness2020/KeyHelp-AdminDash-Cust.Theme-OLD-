@@ -114,6 +114,10 @@ function getXmlHttpRequestObject(aw)
                               {
                                 setInterval(ServiceAbfrage, 5000);
                               }
+			    if (prop === 'block_temperatur')
+                              {
+			        setInterval(TemperaturAbfrage, 15000);
+                              }
                           var blockdiv  = document.getElementById(prop+'_Div');
                           if (blockdiv)
                             {
@@ -315,7 +319,7 @@ $('column .card-header.app-is-collapsed').trigger('click');
 
      var TeamSpeak3Div = $("#TeamSpeak3");
      function TeamSpeakAbfrage(){
-       console.debug('TeamSpeak3 Box Intervalabfrage ausgelöst.');
+       console.debug('(TeamSpeak3 Box) Intervalabfrage ausgelöst.');
           $.post('theme/otd/admin_dash_status.php?realtime=teamspeak3', {
          }, async function(data){
             $(TeamSpeak3Div).html(data);
@@ -323,6 +327,22 @@ $('column .card-header.app-is-collapsed').trigger('click');
      };
 
      TeamSpeakAbfrage();
+
+
+ //----------------------------------------------------------------------------------------------------------------------
+ // OTD Temperatur Status
+ //----------------------------------------------------------------------------------------------------------------------
+
+      var TemperaturDiv = $("#Temperatur");
+      function TemperaturAbfrage(){
+        console.debug('(Temperatur Box) Intervalabfrage ausgelöst.');
+           $.post('theme/otd/admin_dash_status.php?realtime=temperatur', {
+          }, async function(temperaturdata){
+             $(TemperaturDiv).html(temperaturdata);
+             });
+      };
+
+      TemperaturAbfrage();
 
 
 //----------------------------------------------------------------------------------------------------------------------

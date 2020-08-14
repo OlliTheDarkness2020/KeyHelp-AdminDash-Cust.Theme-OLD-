@@ -505,6 +505,11 @@
       {% include 'includes/status_diskspace.twig' %}
     {% include 'includes/card_end_stacked.twig' %}
 
+  {# 1.6 (Status Temperatur) #}
+	  {% include 'includes/card_start_stacked_temperatur.twig' with { '_label': 'Temperaturen', '_icon': 'fas fa-temperature-low fa-lg', '_has_margin_top': true } %}
+      {% include 'includes/status_temperatur.twig' %}
+    {% include 'includes/card_end_stacked.twig' %}
+
 {# CUSTOMS Ende #}
 
     </div>

@@ -21,9 +21,10 @@ Datenschutzhinweiß für Funktion $pucheck und $elcheck:
 
 	$block_service 		= 'true';		// Service / Port Status
 	$block_teamspeak 	= 'false';		// TeamSpeak Status
-	$block_smart	 	= 'false';		// S.M.A.R.T Status
-	$block_raid	 	= 'false';		// RAID Status
+	$block_smart	 	= 'false';		// S.M.A.R.T Status - NUR BEI ROOT- NICHT BEI VSERVERN MÖGLICH
+	$block_raid	 	= 'false';		// RAID Status - NUR BEI ROOT- NICHT BEI VSERVERN MÖGLICH
 	$block_diskspace	= 'true';		// Speicherplatz Status
+	$block_temperatur	= 'true';		// Temperatur Status - NUR BEI ROOT- NICHT BEI VSERVERN MÖGLICH
 
 /*	KeyHelp Block Anzeige Aktivierung (true) / Deaktivierung (false) */
 

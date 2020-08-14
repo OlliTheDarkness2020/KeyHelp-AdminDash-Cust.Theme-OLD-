@@ -3,7 +3,7 @@ include_once 'setting.php';
 
 $tsdebug = "ohno";
 
-$panel_version = '1.2.3Dev';
+$panel_version = '1.2.4Dev';
 
 /* String Funktion Beginn */
 function get_string_between($string, $start, $end) {
@@ -18,7 +18,19 @@ function get_string_between($string, $start, $end) {
 
 if (filemtime('setting.php') > filemtime('setting_block.json'))
   {
-    $blockfile = array('block_news' => $block_news, 'block_server' => $block_server, 'block_resources' => $block_resources, 'block_notes' => $block_notes, 'block_applications' => $block_applications, 'block_service' => $block_service, 'block_teamspeak' => $block_teamspeak, 'block_smart' => $block_smart, 'block_raid' => $block_raid, 'block_diskspace' => $block_diskspace);
+    $blockfile = array(
+      'block_news' => $block_news,
+      'block_server' => $block_server,
+      'block_resources' => $block_resources,
+      'block_notes' => $block_notes,
+      'block_applications' => $block_applications,
+      'block_service' => $block_service,
+      'block_teamspeak' => $block_teamspeak,
+      'block_smart' => $block_smart,
+      'block_raid' => $block_raid,
+      'block_diskspace' => $block_diskspace,
+      'block_temperatur' => $block_temperatur
+    );
     $blockjson = json_encode($blockfile);
     $handle = fopen("setting_block.json", "w");
     fwrite($handle, $blockjson);
@@ -539,6 +551,128 @@ switch ($_GET["realtime"]) {
         echo $panel_version;
         exit();
     break;
+
+    case 'temperatur':
+        /* --------- Temperatur Status --------- */
+        echo $stylecss;
+         $readtempsys1 = fopen("/sys/devices/virtual/thermal/thermal_zone0/temp","r");
+         $tempsys1 = fgets($readtempsys1);
+         $systemp1 = @round($tempsys1/1000);
+
+         $readtempsys2 = fopen("/sys/devices/virtual/thermal/thermal_zone1/temp","r");
+         $tempsys2 = fgets($readtempsys2);
+         $systemp2 = @round($tempsys2/1000);
+
+         $readtempcpu = fopen("/sys/devices/virtual/thermal/thermal_zone2/temp","r");
+         $tempcpu = fgets($readtempcpu);
+         $cputemp = @round($tempcpu/1000);
+
+         if ($systemp1 <= 35)
+          {
+            $temp1color = 'is-success';
+          }
+         if ($systemp1 > 35)
+          {
+            $temp1color = 'is-warning';
+          }
+         if ($systemp1 > 50)
+          {
+            $temp1color = 'is-danger blink';
+          }
+
+         if ($systemp2 <= 35)
+          {
+            $temp2color = 'is-success';
+          }
+         if ($systemp2 > 35)
+          {
+            $temp2color = 'is-warning';
+          }
+         if ($systemp2 > 50)
+          {
+            $temp2color = 'is-danger blink';
+          }
+
+         if ($cputemp <= 50)
+          {
+            $cpucolor = 'is-success';
+          }
+         if ($cputemp > 50)
+          {
+            $cpucolor = 'is-warning';
+          }
+         if ($cputemp > 70)
+          {
+            $cpucolor = 'is-danger blink';
+          }
+         fclose($readtempsys1);
+         fclose($readtempsys2);
+         fclose($readtempcpu);
+        echo '
+      		<div class="table-container">
+      		<table class="table is-fullwidth is-striped">
+      			<colgroup>
+      				<col span="1" style="width: 40%;">
+      				<col span="1" style="width: 20%;">
+      				<col span="1" style="width: 40%;">
+      			</colgroup>
+      		<tbody>
+      		<tr>
+      			<th><u>Sensor</u></th>
+      			<th><center><u>°C</u></center></th>
+      			<th><center><u> </u></center></th>
+      		</tr>
+      		';
+            echo '
+          				<tr>
+          					<td><b> System Temp 1 </b></td>
+          					<td>
+          						<center>
+          							' . $systemp1 . ' °C
+          						</center>
+          					</td>
+          					<td>
+          						<center>
+          							<progress class="progress is-xsmall '.$temp1color.'" value="' . $systemp1 . '" max="100"></progress>
+          						</center>
+          					</td>
+          				</tr>
+                  <tr>
+          					<td><b> System Temp 2 </b></td>
+          					<td>
+          						<center>
+          							' . $systemp2 . ' °C
+          						</center>
+          					</td>
+          					<td>
+          						<center>
+          							<progress class="progress is-xsmall '.$temp2color.'" value="' . $systemp2 . '" max="100"></progress>
+          						</center>
+          					</td>
+          				</tr>
+                  <tr>
+          					<td><b> CPU Temp </b></td>
+          					<td>
+          						<center>
+          							' . $cputemp . ' °C
+          						</center>
+          					</td>
+          					<td>
+          						<center>
+          							<progress class="progress is-xsmall '.$cpucolor.'" value="' . $cputemp . '" max="100"></progress>
+          						</center>
+          					</td>
+          				</tr>
+          			';
+        echo '
+          	</tbody>
+          </table>
+          </div>
+          <div align="right"><b>Stand</b>: ' . date("H:i:s", time()) . ' Uhr</div>
+      		';
+        exit();
+    break;
+
         /* Service Monitor Ende */
     default:
         echo 'Keine Ausgabe gewählt oder Daten fehlerhaft.';
