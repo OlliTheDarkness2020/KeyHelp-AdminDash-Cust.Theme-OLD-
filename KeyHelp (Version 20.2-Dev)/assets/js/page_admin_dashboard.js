@@ -114,9 +114,9 @@ function getXmlHttpRequestObject(aw)
                               {
                                 setInterval(ServiceAbfrage, 5000);
                               }
-			    if (prop === 'block_temperatur')
+                            if (prop === 'block_temperatur')
                               {
-			        setInterval(TemperaturAbfrage, 15000);
+                                setInterval(TemperaturAbfrage, 15000);
                               }
                           var blockdiv  = document.getElementById(prop+'_Div');
                           if (blockdiv)
@@ -359,6 +359,22 @@ $('column .card-header.app-is-collapsed').trigger('click');
     };
 
     DiskspaceAbfrage();
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// OTD MailGraph Status
+//----------------------------------------------------------------------------------------------------------------------
+
+    var MailgraphDiv = $("#MailGraph");
+    function MailgraphAbfrage(){
+      console.debug('(MailGraph Box) Abfrage ausgelöst.');
+        $.post('theme/otd/admin_dash_status.php?realtime=mailgraph', {
+        }, function(MailgraphData){
+           $(MailgraphDiv).html(MailgraphData);
+        });
+    };
+
+    MailgraphAbfrage();
 
 
 //----------------------------------------------------------------------------------------------------------------------

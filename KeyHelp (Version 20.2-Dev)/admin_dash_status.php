@@ -3,7 +3,7 @@ include_once 'setting.php';
 
 $tsdebug = "ohno";
 
-$panel_version = '1.2.4Dev';
+$panel_version = '1.2.5Dev';
 
 /* String Funktion Beginn */
 function get_string_between($string, $start, $end) {
@@ -29,13 +29,93 @@ if (filemtime('setting.php') > filemtime('setting_block.json'))
       'block_smart' => $block_smart,
       'block_raid' => $block_raid,
       'block_diskspace' => $block_diskspace,
-      'block_temperatur' => $block_temperatur
+      'block_temperatur' => $block_temperatur,
+      'block_mailgraph' => $block_mailgraph
     );
     $blockjson = json_encode($blockfile);
     $handle = fopen("setting_block.json", "w");
     fwrite($handle, $blockjson);
     fclose($handle);
   }
+
+function toolsinstall($lockarea, $id_user, $status, $is_enabled, $type, $command, $description, $notify, $minute, $hour, $day_of_month, $month, $day_of_week)
+  {
+    if (file_exists('.lock_'.$lockarea))
+      {
+        // Ja - Tue nichts !
+      }
+    else
+      {
+        // Nein - Erstelle CronJob und LockFile
+          $khconfreader = file_get_contents('/etc/keyhelp/config/config.json', true);
+          $data = json_decode($khconfreader,true);
+            $dbconhost = $data["database"]["keyhelp"]["host"];
+            $dbconname = $data["database"]["keyhelp"]["database"];
+            $dbconusr = $data["database"]["keyhelp"]["username"];
+            $dbconkennwkew = $data["database"]["keyhelp"]["password"];
+          try
+            {
+              /* Type = 1200 | Data = a:1:{s:7:"id_user";i:0;} */
+              $dbcon = new PDO("mysql:host=$dbconhost;dbname=$dbconname", $dbconusr, $dbconkennw);
+              $dbcon->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+              $dbin = "INSERT INTO scheduled_tasks (id_user, status, is_enabled, type, command, description, notify, minute, hour, day_of_month, month, day_of_week) VALUES ($id_user, $status, $is_enabled, $type, $command, $description, $notify, $minute, $hour, $day_of_month, $month, $day_of_week)";
+              $dbinfire = "INSERT INTO crontasks (type, data) VALUES ('1200', 'a:1:{s:7:"id_user";i:0;}')";
+              $dbcon->exec($dbin);
+              $dbcon->exec($dbinfire);
+            }
+          catch(PDOException $e)
+            {
+              echo "Scheduled Tasks: " . $dbin . "<br>" . $e->getMessage() . " - "; 
+              echo "KH Aufgabenverarbeitung: " . $dbinfire . "<br>" . $e->getMessage() . " - ";
+            }
+          finally
+            {
+              $dbcon = null;
+            }
+          $handle = fopen(".lock_".$lockarea, "w");
+          fwrite($handle, 'Installiert');
+          fclose($handle);
+      }
+  }
+
+/*
+
+array(2)
+{
+  ["database"]=> array(2)
+    {
+      ["keyhelp"]=> array(4)
+        {
+            ["host"]=> string(9) "localhost"
+            ["username"]=> string(7) "keyhelp"
+            ["password"]=> string(16) "nhkwmPerW7AnZrSh"
+            ["database"]=> string(7) "keyhelp"
+        }
+      ["root"]=> array(3)
+        {
+          ["host"]=> string(9) "localhost"
+          ["username"]=> string(12) "keyhelp_root"
+          ["password"]=> string(16) "DYcbeuqiHyN57Ee5"
+        }
+    }
+  ["encryption"]=> array(1)
+    {
+      ["base"]=> string(24) "bP9Kf61k4m3OzYRAjl2u0iK8"
+    }
+}
+
+*/
+
+
+
+
+
+
+
+
+
+
+
 
 $stylecss = '
 		<style type="text/css">
@@ -555,16 +635,16 @@ switch ($_GET["realtime"]) {
     case 'temperatur':
         /* --------- Temperatur Status --------- */
         echo $stylecss;
-         $readtempsys1 = fopen("/sys/devices/virtual/thermal/thermal_zone0/temp","r");
-         $tempsys1 = fgets($readtempsys1);
+         $readtempsys1 = @fopen("/sys/devices/virtual/thermal/thermal_zone0/temp","r");
+         $tempsys1 = @fgets($readtempsys1);
          $systemp1 = @round($tempsys1/1000);
 
-         $readtempsys2 = fopen("/sys/devices/virtual/thermal/thermal_zone1/temp","r");
-         $tempsys2 = fgets($readtempsys2);
+         $readtempsys2 = @fopen("/sys/devices/virtual/thermal/thermal_zone1/temp","r");
+         $tempsys2 = @fgets($readtempsys2);
          $systemp2 = @round($tempsys2/1000);
 
-         $readtempcpu = fopen("/sys/devices/virtual/thermal/thermal_zone2/temp","r");
-         $tempcpu = fgets($readtempcpu);
+         $readtempcpu = @fopen("/sys/devices/virtual/thermal/thermal_zone2/temp","r");
+         $tempcpu = @fgets($readtempcpu);
          $cputemp = @round($tempcpu/1000);
 
          if ($systemp1 <= 35)
@@ -605,71 +685,94 @@ switch ($_GET["realtime"]) {
           {
             $cpucolor = 'is-danger blink';
           }
-         fclose($readtempsys1);
-         fclose($readtempsys2);
-         fclose($readtempcpu);
+         @fclose($readtempsys1);
+         @fclose($readtempsys2);
+         @fclose($readtempcpu);
         echo '
-      		<div class="table-container">
-      		<table class="table is-fullwidth is-striped">
-      			<colgroup>
-      				<col span="1" style="width: 40%;">
-      				<col span="1" style="width: 20%;">
-      				<col span="1" style="width: 40%;">
-      			</colgroup>
-      		<tbody>
-      		<tr>
-      			<th><u>Sensor</u></th>
-      			<th><center><u>°C</u></center></th>
-      			<th><center><u> </u></center></th>
-      		</tr>
-      		';
+          <div class="table-container">
+          <table class="table is-fullwidth is-striped">
+            <colgroup>
+              <col span="1" style="width: 40%;">
+              <col span="1" style="width: 20%;">
+              <col span="1" style="width: 40%;">
+            </colgroup>
+          <tbody>
+          <tr>
+            <th><u>Sensor</u></th>
+            <th><center><u>°C</u></center></th>
+            <th><center><u> </u></center></th>
+          </tr>
+          ';
             echo '
-          				<tr>
-          					<td><b> System Temp 1 </b></td>
-          					<td>
-          						<center>
-          							' . $systemp1 . ' °C
-          						</center>
-          					</td>
-          					<td>
-          						<center>
-          							<progress class="progress is-xsmall '.$temp1color.'" value="' . $systemp1 . '" max="100"></progress>
-          						</center>
-          					</td>
-          				</tr>
                   <tr>
-          					<td><b> System Temp 2 </b></td>
-          					<td>
-          						<center>
-          							' . $systemp2 . ' °C
-          						</center>
-          					</td>
-          					<td>
-          						<center>
-          							<progress class="progress is-xsmall '.$temp2color.'" value="' . $systemp2 . '" max="100"></progress>
-          						</center>
-          					</td>
-          				</tr>
+                    <td><b> System Temp 1 </b></td>
+                    <td>
+                      <center>
+                        ' . $systemp1 . ' °C
+                      </center>
+                    </td>
+                    <td>
+                      <center>
+                        <progress class="progress is-xsmall '.$temp1color.'" value="' . $systemp1 . '" max="100"></progress>
+                      </center>
+                    </td>
+                  </tr>
                   <tr>
-          					<td><b> CPU Temp </b></td>
-          					<td>
-          						<center>
-          							' . $cputemp . ' °C
-          						</center>
-          					</td>
-          					<td>
-          						<center>
-          							<progress class="progress is-xsmall '.$cpucolor.'" value="' . $cputemp . '" max="100"></progress>
-          						</center>
-          					</td>
-          				</tr>
-          			';
+                    <td><b> System Temp 2 </b></td>
+                    <td>
+                      <center>
+                        ' . $systemp2 . ' °C
+                      </center>
+                    </td>
+                    <td>
+                      <center>
+                        <progress class="progress is-xsmall '.$temp2color.'" value="' . $systemp2 . '" max="100"></progress>
+                      </center>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><b> CPU Temp </b></td>
+                    <td>
+                      <center>
+                        ' . $cputemp . ' °C
+                      </center>
+                    </td>
+                    <td>
+                      <center>
+                        <progress class="progress is-xsmall '.$cpucolor.'" value="' . $cputemp . '" max="100"></progress>
+                      </center>
+                    </td>
+                  </tr>
+                ';
         echo '
-          	</tbody>
+            </tbody>
           </table>
           </div>
           <div align="right"><b>Stand</b>: ' . date("H:i:s", time()) . ' Uhr</div>
-      		';
+          ';
+        exit();
+    break;
+
+    case 'mailgraph':
+        /* --------- Mail Graph Status --------- */
+          /* toolsinstall(App / Tool, Cron-User, KH-Status (3), Aktivierung (1), Typ-Ausführung (exec), Befehl, Beschreibung, Mail-Benachrichtigung (none), Minute, Stunde, Tag-des-Monats, Monat, Tag-der-Woche) */
+          echo toolsinstall('mailgraph', '0', '3', '1', 'exec', '/home/keyhelp/www/keyhelp/theme/otd/assets/tools/buildMailgraphGraphs.pl', 'OTD-Theme - MailGraph', 'none', '*/30', '*', '*', '*', '*');
+          echo
+            '
+              <style>  </style>
+            '
+          ;
+
+
+
+
+
+
+          echo
+            '
+              <div align="right"><b>Stand</b>: ' . date("H:i:s", time()) . ' Uhr</div>
+            '
+          ;
         exit();
     break;
 

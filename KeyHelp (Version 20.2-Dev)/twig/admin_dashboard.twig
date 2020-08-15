@@ -515,6 +515,11 @@
     </div>
 </div>
 
+{# 1.7 (Status MailGraph) #}
+          {% include 'includes/card_start_stacked_mailgraph.twig' with { '_label': 'MailGraph', '_icon': 'fas fa-chart-line'} %}
+      {% include 'includes/status_mailgraph.twig' %}
+    {% include 'includes/card_end.twig' %}
+
 {# Custom Footer Start #}
     {% include 'includes/card_start_stacked_cr.twig' with { '_label': 'Copyright 2020 - Custom Admin Dashboard by OlliTheDarkness & Moritz83 for KeyHelp', '_icon': 'far fa-copyright'} %}
               <div id="CopyRight-OTD">

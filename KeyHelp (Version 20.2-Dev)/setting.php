@@ -25,6 +25,7 @@ Datenschutzhinweiß für Funktion $pucheck und $elcheck:
 	$block_raid	 	= 'false';		// RAID Status - NUR BEI ROOT- NICHT BEI VSERVERN MÖGLICH
 	$block_diskspace	= 'true';		// Speicherplatz Status
 	$block_temperatur	= 'true';		// Temperatur Status - NUR BEI ROOT- NICHT BEI VSERVERN MÖGLICH
+	$block_mailgraph	= 'true';		// MailGraph Status
 
 /*	KeyHelp Block Anzeige Aktivierung (true) / Deaktivierung (false) */
 
