@@ -1,4 +1,5 @@
 <?php
+session_start();
 include_once 'setting.php';
 
 $tsdebug = "ohno";
@@ -37,85 +38,6 @@ if (filemtime('setting.php') > filemtime('setting_block.json'))
     fwrite($handle, $blockjson);
     fclose($handle);
   }
-
-function toolsinstall($lockarea, $id_user, $status, $is_enabled, $type, $command, $description, $notify, $minute, $hour, $day_of_month, $month, $day_of_week)
-  {
-    if (file_exists('.lock_'.$lockarea))
-      {
-        // Ja - Tue nichts !
-      }
-    else
-      {
-        // Nein - Erstelle CronJob und LockFile
-          $khconfreader = file_get_contents('/etc/keyhelp/config/config.json', true);
-          $data = json_decode($khconfreader,true);
-            $dbconhost = $data["database"]["keyhelp"]["host"];
-            $dbconname = $data["database"]["keyhelp"]["database"];
-            $dbconusr = $data["database"]["keyhelp"]["username"];
-            $dbconkennwkew = $data["database"]["keyhelp"]["password"];
-          try
-            {
-              /* Type = 1200 | Data = a:1:{s:7:"id_user";i:0;} */
-              $dbcon = new PDO("mysql:host=$dbconhost;dbname=$dbconname", $dbconusr, $dbconkennw);
-              $dbcon->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-              $dbin = "INSERT INTO scheduled_tasks (id_user, status, is_enabled, type, command, description, notify, minute, hour, day_of_month, month, day_of_week) VALUES ($id_user, $status, $is_enabled, $type, $command, $description, $notify, $minute, $hour, $day_of_month, $month, $day_of_week)";
-              $dbinfire = "INSERT INTO crontasks (type, data) VALUES ('1200', 'a:1:{s:7:"id_user";i:0;}')";
-              $dbcon->exec($dbin);
-              $dbcon->exec($dbinfire);
-            }
-          catch(PDOException $e)
-            {
-              echo "Scheduled Tasks: " . $dbin . "<br>" . $e->getMessage() . " - "; 
-              echo "KH Aufgabenverarbeitung: " . $dbinfire . "<br>" . $e->getMessage() . " - ";
-            }
-          finally
-            {
-              $dbcon = null;
-            }
-          $handle = fopen(".lock_".$lockarea, "w");
-          fwrite($handle, 'Installiert');
-          fclose($handle);
-      }
-  }
-
-/*
-
-array(2)
-{
-  ["database"]=> array(2)
-    {
-      ["keyhelp"]=> array(4)
-        {
-            ["host"]=> string(9) "localhost"
-            ["username"]=> string(7) "keyhelp"
-            ["password"]=> string(16) "nhkwmPerW7AnZrSh"
-            ["database"]=> string(7) "keyhelp"
-        }
-      ["root"]=> array(3)
-        {
-          ["host"]=> string(9) "localhost"
-          ["username"]=> string(12) "keyhelp_root"
-          ["password"]=> string(16) "DYcbeuqiHyN57Ee5"
-        }
-    }
-  ["encryption"]=> array(1)
-    {
-      ["base"]=> string(24) "bP9Kf61k4m3OzYRAjl2u0iK8"
-    }
-}
-
-*/
-
-
-
-
-
-
-
-
-
-
-
 
 $stylecss = '
 		<style type="text/css">
@@ -482,7 +404,7 @@ switch ($_GET["realtime"]) {
                 $uri = "serverquery://" . $item[3] . ":" . $item[4] . "@" . $item[0] . ":" . $item[1];
                 $ts3 = TeamSpeak3::factory($uri);
                 try {
-                    session_start(['cookie_lifetime' => 43200]);
+                    // session_start(['cookie_lifetime' => 43200]);
                     $uri = "serverquery://" . $item[3] . ":" . $item[4] . "@" . $item[0] . ":" . $item[1] . "/?server_port=" . $item[2];
                     $_SESSION["_TS3_" . $item[0] . $item[2]] = serialize($uri);
                     session_write_close();
@@ -755,24 +677,33 @@ switch ($_GET["realtime"]) {
 
     case 'mailgraph':
         /* --------- Mail Graph Status --------- */
-          /* toolsinstall(App / Tool, Cron-User, KH-Status (3), Aktivierung (1), Typ-Ausführung (exec), Befehl, Beschreibung, Mail-Benachrichtigung (none), Minute, Stunde, Tag-des-Monats, Monat, Tag-der-Woche) */
-          echo toolsinstall('mailgraph', '0', '3', '1', 'exec', '/home/keyhelp/www/keyhelp/theme/otd/assets/tools/buildMailgraphGraphs.pl', 'OTD-Theme - MailGraph', 'none', '*/30', '*', '*', '*', '*');
-          echo
-            '
-              <style>  </style>
-            '
-          ;
+        echo $stylecss;
+          if (!file_exists('/home/keyhelp/www/keyhelp/theme/otd/.lock_mailgraph'))
+            {
+              $_SESSION['tool_mailgraph_install'] = 'yes we can';
+              echo '<p> <b> <u> Information </u> </b> </p>';
+              echo '<p> Es muss zusätzliche Software installiert werden (ca. 1 MB). <br /> Des weiteren wird ein CronJob erstellt. </p>';
+              echo '<p> Leider ist dies nicht voll automatisch möglich. </p>';
+              echo '<p> <b> <u> Schnellanleitung </u> </b> </p>';
+              echo '<p> Führen Sie bitte folgenden Befehl auf der Shell aus: <b> apt install librrds-perl </b> </p>';
+              echo '<p> Das war es auch fast schon. Der Rest wird automatisch durchgeführt wenn Sie "Jetzt installieren" klicken. </p>';
+              echo '<p> Durch klicken auf "Jetzt installieren" aktzeptieren Sie die Installation des CronJobs ! </p>';
+              echo '<a class="button is-link is-warning" href="theme/otd/assets/sites/admin-dash-modal.php?modal=tool_mailgraph_install" rel="modal:open">Jetzt installieren</a>';
+            }
+          else
+            {
+              echo
+                '
+                  <style>  </style>
+                '
+              ;
 
-
-
-
-
-
-          echo
-            '
-              <div align="right"><b>Stand</b>: ' . date("H:i:s", time()) . ' Uhr</div>
-            '
-          ;
+              echo
+                '
+                  <div align="right"><b>Stand</b>: ' . date("H:i:s", time()) . ' Uhr</div>
+                '
+              ;
+            }
         exit();
     break;
 

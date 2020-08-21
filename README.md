@@ -1,5 +1,21 @@
 KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
+<h2><b><u>(Dev-Version) Änderungen 20/21.08.2020 (Version 1.2.5Dev)</u></b></h2>
+
+<b>Dash Panel</b>
+<ul>
+
+<li> Einpflegen von MailGraph fortgesetzt. (In Progress / Wait for MainTool) </li>
+
+<li> Anleitung / Installationsroutine für MailGraph eingebaut. </li>
+
+<li> Weitere Prüfungen und Sicherheitschecks eingepflegt. </li>
+
+</ul>
+<br>
+<hr>
+<br>
+
 <h2><b><u>(Dev-Version) Änderungen 15.08.2020 (Version 1.2.5Dev)</u></b></h2>
 
 <b>GIT</b>
