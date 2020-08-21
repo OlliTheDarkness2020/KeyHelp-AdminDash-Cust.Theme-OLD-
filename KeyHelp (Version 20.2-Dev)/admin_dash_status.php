@@ -678,6 +678,7 @@ switch ($_GET["realtime"]) {
     case 'mailgraph':
         /* --------- Mail Graph Status --------- */
         echo $stylecss;
+        echo ' <link rel="stylesheet" href="theme/otd/assets/css/lightbox.min.css"> ';
           if (!file_exists('/home/keyhelp/www/keyhelp/theme/otd/.lock_mailgraph'))
             {
               $_SESSION['tool_mailgraph_install'] = 'yes we can';
@@ -694,12 +695,112 @@ switch ($_GET["realtime"]) {
             {
               echo
                 '
-                  <style>  </style>
-                '
-              ;
+                  <style>
+                  .divTable
+                    {
+                    display: table;
+                    width: 100%;
+                    }
 
-              echo
-                '
+                  .divTableRow
+                    {
+                    display: table-row;
+                    }
+
+                  .divTableHeading
+                    {
+                    background-color: #EEE;
+                    display: table-header-group;
+                    }
+
+                  .divTableCell, .divTableHead
+                    {
+                    border: 1px solid #999999;
+                    display: table-cell;
+                    padding: 3px 10px;
+                    text-align: center;
+                    }
+
+                  .divTableHeading
+                    {
+                    background-color: #EEE;
+                    display: table-header-group;
+                    font-weight: bold;
+                    }
+
+                  .divTableFoot
+                    {
+                    background-color: #EEE;
+                    display: table-footer-group;
+                    font-weight: bold;
+                    }
+
+                  .divTableBody
+                    {
+                    display: table-row-group;
+                    }
+                  </style>
+
+                  <h1 class="title" style="text-align: center;"> Mail Graph </h1>
+                  <div class="divTable">
+                  	<div class="divTableBody">
+                  		<div class="divTableRow">
+                  			<div class="divTableCell"> <b> <u> Tag </u> </b> </div>
+                  			<div class="divTableCell"> <b> <u> Woche </u> </b> </div>
+                  			<div class="divTableCell"> <b> <u> Monat </u> </b> </div>
+                        <div class="divTableCell"> <b> <u> Jahr </u> </b> </div>
+                  		</div>
+                  		<div class="divTableRow">
+                  			<div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_day.png" data-lightbox="MailGraph Tagesansicht" data-title="MailGraph Tagesansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_day.png" alt="MailGraph Tagesansicht" /> </a> </div>
+                  			<div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_week.png" data-lightbox="MailGraph Wochenansicht" data-title="MailGraph Wochenansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_week.png" alt="MailGraph Wochenansicht" /> </a> </div>
+                  			<div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_month.png" data-lightbox="MailGraph Monatsansicht" data-title="MailGraph Monatsansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_month.png" alt="MailGraph Monatsansicht" /> </a> </div>
+                        <div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_year.png" data-lightbox="MailGraph Jahresansicht" data-title="MailGraph Jahresansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_year.png" alt="MailGraph Jahresansicht" /> </a> </div>
+                  		</div>
+                  	</div>
+                  </div>
+
+                  <hr>
+
+                  <h1 class="title" style="text-align: center;"> Virus Graph </h1>
+                  <div class="divTable">
+                  	<div class="divTableBody">
+                  		<div class="divTableRow">
+                  			<div class="divTableCell"> <b> <u> Tag </u> </b> </div>
+                  			<div class="divTableCell"> <b> <u> Woche </u> </b> </div>
+                  			<div class="divTableCell"> <b> <u> Monat </u> </b> </div>
+                        <div class="divTableCell"> <b> <u> Jahr </u> </b> </div>
+                  		</div>
+                  		<div class="divTableRow">
+                  			<div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_virus_day.png" data-lightbox="VirusGraph Tagesansicht" data-title="VirusGraph Tagesansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_virus_day.png" alt="VirusGraph Tagesansicht" /> </a> </div>
+                  			<div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_virus_week.png" data-lightbox="VirusGraph Wochenansicht" data-title="VirusGraph Wochenansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_virus_week.png" alt="VirusGraph Wochenansicht" /> </a> </div>
+                  			<div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_virus_month.png" data-lightbox="VirusGraph Monatsansicht" data-title="VirusGraph Monatsansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_virus_month.png" alt="VirusGraph Monatsansicht" /> </a> </div>
+                        <div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_virus_year.png" data-lightbox="VirusGraph Jahresansicht" data-title="VirusGraph Jahresansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_virus_year.png" alt="VirusGraph Jahresansicht" /> </a> </div>
+                  		</div>
+                  	</div>
+                  </div>
+
+                  <hr>
+
+                  <h1 class="title" style="text-align: center;"> Greylist Graph </h1>
+                  <div class="divTable">
+                  	<div class="divTableBody">
+                  		<div class="divTableRow">
+                  			<div class="divTableCell"> <b> <u> Tag </u> </b> </div>
+                  			<div class="divTableCell"> <b> <u> Woche </u> </b> </div>
+                  			<div class="divTableCell"> <b> <u> Monat </u> </b> </div>
+                        <div class="divTableCell"> <b> <u> Jahr </u> </b> </div>
+                  		</div>
+                  		<div class="divTableRow">
+                  			<div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_greylist_day.png" data-lightbox="GreylistGraph Tagesansicht" data-title="GreylistGraph Tagesansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_greylist_day.png" alt="GreylistGraph Tagesansicht" /> </a> </div>
+                  			<div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_greylist_week.png" data-lightbox="GreylistGraph Wochenansicht" data-title="GreylistGraph Wochenansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_greylist_week.png" alt="GreylistGraph Wochenansicht" /> </a> </div>
+                  			<div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_greylist_month.png" data-lightbox="GreylistGraph Monatsansicht" data-title="GreylistGraph Monatsansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_greylist_month.png" alt="GreylistGraph Monatsansicht" /> </a> </div>
+                        <div class="divTableCell"> <a href="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_greylist_year.png" data-lightbox="GreylistGraph Jahresansicht" data-title="GreylistGraph Jahresansicht"> <img src="theme/otd/assets/img/rrd_graphs/keyhelp_mailgraph_greylist_year.png" alt="GreylistGraph Jahresansicht" /> </a> </div>
+                  		</div>
+                  	</div>
+                  </div>
+
+                  <hr>
+
                   <div align="right"><b>Stand</b>: ' . date("H:i:s", time()) . ' Uhr</div>
                 '
               ;

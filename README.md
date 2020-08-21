@@ -5,7 +5,7 @@ KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 <b>Dash Panel</b>
 <ul>
 
-<li> Einpflegen von MailGraph fortgesetzt. (In Progress / Wait for MainTool) </li>
+<li> Einpflegen von MailGraph abgeschlossen. </li>
 
 <li> Anleitung / Installationsroutine für MailGraph eingebaut. </li>
 
