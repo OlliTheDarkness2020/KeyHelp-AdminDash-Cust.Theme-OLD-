@@ -7,6 +7,8 @@ KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
 <li> FIX: Graph Cache gefixxt. </li>
 
+<li> FIX: MailGraph Script Pfade gefixxt. </li>
+
 </ul>
 <br>
 <hr>
