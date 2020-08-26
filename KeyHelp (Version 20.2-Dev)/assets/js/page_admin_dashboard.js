@@ -14,7 +14,7 @@ function debug(bool){
         console = consoleHolder;
     }
 }
-debug(true);
+debug(false);
 
 //----------------------------------------------------------------------------------------------------------------------
 // OTD Allgemeines
@@ -71,17 +71,7 @@ function getXmlHttpRequestObject(aw)
             blockreq.setRequestHeader("Content-Type","text/plain");
             blockreq.onreadystatechange = setBlockMessage;
             console.debug('(Blocksystem) JSON Abfrage, erwarte Ergebnis ... ');
-            // await Sleeper(5000);
             blockreq.send(null);
-
-            /* catch (e)
-              {
-                console.debug(e);
-                document.getElementById('block_error_Div').style.display = "block";
-                document.getElementById('otd-error_msg').innerHTML += e;
-
-              }
-              */
           }
         else
           {
