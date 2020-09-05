@@ -686,7 +686,7 @@ switch ($_GET["realtime"]) {
               echo '<p> Es muss zusätzliche Software installiert werden (ca. 1 MB). <br /> Des weiteren wird ein CronJob erstellt. </p>';
               echo '<p> Leider ist dies nicht voll automatisch möglich. </p>';
               echo '<p> <b> <u> Schnellanleitung </u> </b> </p>';
-              echo '<p> Führen Sie bitte folgenden Befehl auf der Shell aus: <b> apt install librrds-perl </b> </p>';
+              echo '<p> Führen Sie bitte folgenden Befehl auf der Shell aus: <b> apt install rrdtool mailgraph librrds-perl </b> </p>';
               echo '<p> Das war es auch fast schon. Der Rest wird automatisch durchgeführt wenn Sie "Jetzt installieren" klicken. </p>';
               echo '<p> Durch klicken auf "Jetzt installieren" aktzeptieren Sie die Installation des CronJobs ! </p>';
               echo '<a class="button is-link is-warning" href="theme/otd/assets/sites/admin-dash-modal.php?modal=tool_mailgraph_install" rel="modal:open">Jetzt installieren</a>';
