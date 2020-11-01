@@ -1,0 +1,10 @@
+Version:    2.29.1
+            (Project will only rceive maintenance updates, consider changing it to a better alternative.)
+
+Releases:   https://github.com/moment/moment/releases
+            (Does not send notifications via Github)
+
+Homepage:   https://momentjs.com/
+
+Notes:      Use the "/moment-x.xx.x/min/moment-with-locales.min.js" located in the release archive
+            and rename it to moment.min.js

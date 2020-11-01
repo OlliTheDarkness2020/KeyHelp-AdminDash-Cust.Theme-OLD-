@@ -1,0 +1,9 @@
+<nav class="breadcrumb is-small has-margin-bottom-none" aria-label="breadcrumbs">
+    <ul>
+        {% for item in _app.breadcrumbs %}
+            <li {% if item.url is empty %}class="is-disabled"{% endif %}>
+                <a href="{{ item.url }}">{{ item.label }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</nav>

@@ -1,0 +1,71 @@
+{% extends 'base/intern.twig' %}
+
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    <div class="has-text-centered has-margin-bottom-xlarge">
+        <h1 class="title">{{ select_firewall }}</h1>
+        <p>{{ select_firewall_help|raw }}</p>
+    </div>
+
+    <div class="columns">
+        <div class="column has-text-centered">
+            <form action="?page=admin_firewall_select" method="post" autocomplete="off">
+                <input type="hidden" name="submit" value="1">
+
+                <div class="card has-equal-height">
+                    <div class="card-content">
+                        <h4 class="title is-4">{{ new_firewall }}</h4>
+                        <p class="has-margin-bottom-large">{{ new_firewall_help|raw }}</p>
+
+                        {{ forms.checkbox_wrapped({
+                            'options': {
+                                'label': hide_select_page,
+                                'name': 'hide_select_page',
+                                'value': '1',
+                                'is_checked': false
+                            }
+                        }) }}
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-footer-item">
+                            {{ forms.button({
+                                'label': go_to_new_firewall,
+                                'style': 'primary',
+                            }) }}
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+        <div class="column has-text-centered">
+            <div class="card has-equal-height">
+                <div class="card-content">
+                    <h4 class="title is-4">{{ old_firewall }}</h4>
+                    <p class="has-margin-bottom-large">{{ old_firewall_help|raw }}</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-footer-item">
+                        {{ forms.button({
+                            'label': go_to_old_firewall,
+                            'style': 'primary',
+                            'url': '?page=admin_firewall_depricated'
+                        }) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+{% endblock %}

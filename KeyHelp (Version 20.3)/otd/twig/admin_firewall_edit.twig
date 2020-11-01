@@ -1,0 +1,166 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block page_scripts %}
+    <script src="/theme/bulma/assets/js/page_firewall.js?{{ _app.cache_control }}"></script>
+{% endblock %}
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    {% include 'includes/card_start.twig' %}
+
+        <form action="?page={{ _app.page }}&action={{ _action }}" method="post" autocomplete="off">
+            <input type="hidden" name="submit" value="1">
+            <input type="hidden" name="id" value="{{ _id }}">
+
+            {% if _is_default_policy %}
+
+                {{ forms.label_wrapped({
+                    'label': name,
+                    'value': _name,
+                }) }}
+
+                {{ forms.radio_wrapped({
+                    'label': action,
+                    'options': [
+                        {
+                            'label': allow,
+                            'name': 'rule_action',
+                            'value': 'allow',
+                            'is_checked': _rule_action == 'allow'
+                        },
+                        {
+                            'label': deny,
+                            'name': 'rule_action',
+                            'value': 'deny',
+                            'is_checked': _rule_action == 'deny'
+                        }
+                    ]
+                }) }}
+
+            {% else %}
+
+                {{ forms.input_wrapped({
+                    'label': name,
+                    'name': 'name',
+                    'type': 'text',
+                    'is_required': true,
+                    'placeholder': any_name,
+                    'value': _name
+                }) }}
+
+                {{ forms.radio_wrapped({
+                    'label': direction,
+                    'options': [
+                        {
+                            'label': incoming_traffic,
+                            'name': 'direction',
+                            'value': 'input',
+                            'is_checked': _direction == 'input'
+                        },
+                        {
+                            'label': outgoing_traffic,
+                            'name': 'direction',
+                            'value': 'output',
+                            'is_checked': _direction == 'output'
+                        },
+                        {
+                            'label': forwarded_traffic,
+                            'name': 'direction',
+                            'value': 'forward',
+                            'is_checked': _direction == 'forward'
+                        }
+                    ]
+                }) }}
+
+                {{ forms.radio_wrapped({
+                    'label': action,
+                    'options': [
+                        {
+                            'label': allow,
+                            'name': 'rule_action',
+                            'value': 'allow',
+                            'is_checked': _rule_action == 'allow'
+                        },
+                        {
+                            'label': deny,
+                            'name': 'rule_action',
+                            'value': 'deny',
+                            'is_checked': _rule_action == 'deny'
+                        },
+                        {
+                            'label': reject,
+                            'help': reject_help,
+                            'name': 'rule_action',
+                            'value': 'reject',
+                            'is_checked': _rule_action == 'reject'
+                        }
+                    ]
+                }) }}
+
+                {{ forms.label_wrapped({
+                    'label': ports,
+                    'help': ports_help,
+                }) }}
+
+                <div class="columns">
+                    <div class="column">
+                        {{ forms.textarea_wrapped({
+                            'help': tcp_ports,
+                            'placeholder': any_port,
+                            'name': 'tcp_ports',
+                            'rows': 3,
+                            'is_auto_resize': true,
+                            'value': _tcp_ports|join("\n")
+                        }) }}
+                    </div>
+                    <div class="column">
+                        {{ forms.textarea_wrapped({
+                            'help': udp_ports,
+                            'placeholder': any_port,
+                            'name': 'udp_ports',
+                            'rows': 3,
+                            'is_auto_resize': true,
+                            'value': _udp_ports|join("\n")
+                        }) }}
+                    </div>
+                </div>
+
+                <div class="app-input-source" style="display: none">
+                    {{ forms.textarea_wrapped({
+                        'label': sources,
+                        'help': sources_destinations_help,
+                        'placeholder': any_host,
+                        'name': 'sources',
+                        'rows': 3,
+                        'is_auto_resize': true,
+                        'value': _sources|join("\n")
+                    }) }}
+                </div>
+
+                <div class="app-input-destination" style="display: none">
+                    {{ forms.textarea_wrapped({
+                        'label': destinations,
+                        'help': sources_destinations_help,
+                        'placeholder': any_host,
+                        'name': 'destinations',
+                        'rows': 3,
+                        'is_auto_resize': true,
+                        'value': _destinations|join("\n")
+                    }) }}
+                </div>
+
+            {% endif %}
+
+
+            {% include 'includes/cta.twig' with { '_back': { 'target': _app.page }, '_confirm': true } %}
+        </form>
+
+    {% include 'includes/card_end.twig' %}
+
+{% endblock %}

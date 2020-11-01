@@ -1,0 +1,222 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block page_scripts %}
+    <script src="/theme/bulma/assets/js/page_disk_usage.js?{{ _app.cache_control }}"></script>
+{% endblock %}
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    {# Intro #}
+    <p class="has-margin-bottom-large">
+        {{ help|raw }}
+    </p>
+
+    {# Viewing options #}
+    <div class="card has-margin-bottom-medium">
+        <div class="card-content">
+            <div class="level has-margin-bottom-none">
+                <div class="level-left">
+                    <div class="level-item">
+                        <strong>{{ viewing_options }}</strong>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        {#
+                            Only for javascript. To access data of these checkboxes,
+                            because they are in a dynamic tooltip element.
+                        #}
+                        <input type="hidden" name="show_object_count" value="{{ _show_object_count }}">
+
+                        {% set _viewing_options_menu %}
+                            <form action="?page={{ _app.page }}&sid={{ _app.sid }}&path={{ _working_dir|url_encode() }}" method="post">
+                                <input type="hidden" name="update_view_options" value="1">
+
+                                <div class="has-text-left has-no-wrap has-padding-small">
+                                    {{ forms.checkbox_wrapped({
+                                        'options': [{
+                                            'label': show_object_count,
+                                            'help': show_object_count_help,
+                                            'name': 'show_object_count',
+                                            'value': '1',
+                                            'is_checked': _show_object_count
+                                        }]
+                                    }) }}
+                                    <div class="has-text-centered">
+                                        {{ forms.button({
+                                            'label': save,
+                                            'style': 'primary',
+                                        }) }}
+                                    </div>
+                                </div>
+                            </form>
+                        {% endset %}
+                        <div class="app-tooltip-click" data-tippy-content="{{ _viewing_options_menu|escape('html') }}">
+                            {{ forms.button({
+                                'label': customize_view,
+                                'type': 'button',
+                            }) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Path navigation #}
+    <div class="card has-margin-bottom-medium">
+        <div class="card-content">
+            <a href="?page={{ _app.page }}&path=/">
+                <span class="icon is-medium">
+                    <i class="fas fa-hdd"></i>
+                </span>
+            </a>
+            <ul class="horizontal-separated-list">
+                <li></li>
+                {% for item in _nav_items %}
+                    <li>
+                        {% if loop.last %}
+                            {{ item.name }}
+                        {% else %}
+                            <a href="?page={{ _app.page }}&path={{ item.path|url_encode() }}">
+                                {{ item.name }}
+                            </a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-content">
+            {# Loading #}
+            <div id="app-loading-animation" class="has-text-centered is-loading">
+                <div class="has-margin-large has-padding-small">
+                    <!--
+                        Only to have some content, so that loading animation can be displayed.
+                        Will be overriden, when ajax call was finished.
+                    -->
+                    {{ gathering_data }}
+                </div>
+            </div>
+            {# Errors #}
+            <div id="app-loading-error" class="has-text-centered" style="display: none">
+                <p class="has-text-danger has-text-weight-bold">
+                    {{ an_error_occurred }}
+                </p>
+                <p id="app-loading-error-message" class="has-margin-y-small is-italic">
+                    <!-- added by JS -->
+                </p>
+                <p>
+                    {{ try_again_later }}
+                </p>
+            </div>
+
+            {# Empty #}
+            <div id="app-container-empty" style="display: none">
+                <div class="has-text-centered has-text-grey">
+                    - {{ no_items_available }} -
+                </div>
+            </div>
+
+            {# Content #}
+            <div id="app-container-content" style="display: none">
+                <input type="hidden" name="working_dir" value="{{ _working_dir }}">
+
+                {% include 'includes/scroll_table_container_buttons.twig' %}
+                <div class="table-container">
+                    <table class="table is-fullwidth is-striped is-hoverable has-valigned-cells">
+                        <thead>
+                            <tr>
+                                <th {% include 'includes/table_sorting.twig' with { '_column': 'name' } %}>
+                                    {{ name }}
+                                </th>
+                                {% if _show_object_count %}
+                                    <th class="has-text-right" {% include 'includes/table_sorting.twig' with { '_column': 'objects' } %}>
+                                        {{ objects }}
+                                    </th>
+                                {% endif %}
+                                <th class="has-text-right" {% include 'includes/table_sorting.twig' with { '_column': 'bytes' } %}>
+                                    {{ size }}
+                                </th>
+                                <th class="has-text-right" {% include 'includes/table_sorting.twig' with { '_column': 'bytes' } %}>
+                                    {{ usage_share }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="app-item-container">
+                            <tr>
+                                <td>
+                                    <a href="?page={{ _app.page }}&path={{ _parent_dir|url_encode() }}">
+                                        {% include 'includes/icon_files.twig' with { _type: 'folder_up' } %}
+                                        ..
+                                    </a>
+                                </td>
+                                {% if _show_object_count %}
+                                    <td></td>
+                                {% endif %}
+                                <td id="app-total-size" class="has-text-right has-no-wrap"></td>
+                                <td colspan="42"></td>
+                            </tr>
+                            <script id="app-item-template" type="text/x-handlebars-template">
+                                {% verbatim %}
+                                    <tr>
+                                        <td>
+                                            {{# if is_dir }}
+                                                <a href="?page={% endverbatim %}{{ _app.page }}{% verbatim %}&path={{ path }}">
+                                                    {% endverbatim %}
+                                                        {% include 'includes/icon_files.twig' with { _type: 'dir' } %}
+                                                    {% verbatim %}
+                                                    {{ name }}
+                                                </a>
+                                            {{ else }}
+                                                {% endverbatim %}
+                                                    {% include 'includes/icon_files.twig' with { _type: 'file' } %}
+                                                {% verbatim %}
+                                                {{ name }}
+                                            {{/ if }}
+                                        </td>
+                                        {% endverbatim %}
+                                            {% if _show_object_count %}
+                                                <td class="has-text-right has-no-wrap">
+                                                    {% verbatim %}
+                                                        {{ objects }}
+                                                    {% endverbatim %}
+                                                </td>
+                                                {% endif %}
+                                        {% verbatim %}
+                                        <td class="has-text-right has-no-wrap">
+                                            {{ size }}
+                                        </td>
+                                        <td>
+                                            {% endverbatim %}
+                                                {{ macros.usage_indicator({
+                                                    'percent': 0,
+                                                }) }}
+                                            {% verbatim %}
+                                        </td>
+                                    </tr>
+                                {% endverbatim %}
+                            </script>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="42" class="has-text-grey-light">
+                                    <span id="app-shown-items-count"></span> {{ items_total }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

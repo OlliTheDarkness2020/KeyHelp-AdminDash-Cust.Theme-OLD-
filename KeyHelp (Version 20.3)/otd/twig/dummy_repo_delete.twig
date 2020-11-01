@@ -1,0 +1,21 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block content %}
+
+    {% include 'includes/delete_page.twig' with {
+        '_action': '?page=' ~ _app.page ~ '&action=repo_delete',
+        '_back_page': _app.page,
+        '_config': {
+            'name': {
+                'label': name
+            },
+            'type': {
+                'label': repository_type
+            }
+        },
+        '_items': _repositories
+    } %}
+
+{% endblock %}

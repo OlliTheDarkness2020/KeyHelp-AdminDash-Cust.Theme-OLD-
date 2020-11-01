@@ -1,0 +1,141 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block page_scripts %}
+    <script>
+        var reloadCache = {{ _items is empty ? 'true' : 'false' }};
+    </script>
+    <script src="/theme/bulma/assets/js/page_applications.js?{{ _app.cache_control }}"></script>
+{% endblock %}
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    {# Intro #}
+    <p class="has-margin-bottom-large">
+        {{ help }}
+    </p>
+
+    {% if _items is empty %}
+        <div class="card">
+            <div class="card-content">
+                <div id="app-loading-animation" class="has-text-centered is-loading">
+                    <div class="has-margin-large has-padding-small">
+                        <!--
+                            Only to have some content, so that loading animation can be displayed.
+                            Will be overriden, when ajax call was finished.
+                        -->
+                    </div>
+                </div>
+                <div id="app-loading-error" class="has-text-centered" style="display: none">
+                    <p class="has-text-danger has-text-weight-bold">
+                        {{ an_error_occurred }}
+                    </p>
+                    <p id="app-loading-error-message" class="has-margin-y-small is-italic"></p>
+                    <p>
+                        {{ try_again_later }}
+                    </p>
+                </div>
+                <div id="app-loading-success" class="has-text-centered has-text-grey" style="display: none">
+                    {{ auto_redirect|raw }}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="card has-margin-bottom-large">
+            <div class="card-content">
+                <buttons class="buttons">
+                    <button class="button" data-show-category="all">{{ all_categories }}</button>
+                    {% for category, label in _categories %}
+                        {{ forms.button({
+                            'label': label,
+                            'data': { 'show-category': category }
+                        }) }}
+                    {% endfor %}
+                </buttons>
+            </div>
+        </div>
+
+        <div class="columns is-multiline">
+            {% for item in _items %}
+                <div class="column is-6-tablet is-6-desktop is-4-widescreen is-4-fullhd" data-category="{{ item.category }}">
+                    <div class="card has-equal-height">
+                        <div class="card-content">
+                            <div class="columns">
+                                <div class="column">
+                                    <p class="title has-no-wrap">
+                                        {{ item.name }}
+                                    </p>
+                                    <p class="subtitle">
+                                        {{ item.category_label }}
+                                    </p>
+                                </div>
+                                {% if item.logo %}
+                                    <div class="column is-narrow has-text-right has-text-left-mobile" style="height: 87px">
+                                        <img style="width: 100px; max-height: 60px" src="{{ item.logo }}">
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <p>
+                                {{ item.description }}
+                            </p>
+
+                            <p class="has-margin-top-medium">
+                                {{ information }}
+                                <a href="{{ item.website }}" target="_blank" rel="nofollow noopener noreferrer">{{ website }}</a>,
+
+                                {% set _requirements %}
+                                    <div class="has-text-left has-padding-small">
+                                        {% for _version in item.versions %}
+                                            <p>
+                                                <b>{{ version }} {{ _version.version_number }}</b>
+                                                {{ loop.first ? '(' ~ latest_version ~ ')' }}
+                                            </p>
+                                            <p>
+                                                {% for _requirement in _version.requirements %}
+                                                    - {{ _requirement }}<br>
+                                                {% endfor %}
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+                                {% endset %}
+
+                                <a class="app-tooltip-click" data-tippy-content="{{ _requirements|escape('html') }}">
+                                    {{ requirements }}
+                                </a>
+                            </p>
+                        </div>
+                        <footer class="card-footer">
+                            <div class="card-footer-item">
+                                <div>
+                                    <form action="" method="get">
+                                        <input type="hidden" name="page" value="{{ _app.page }}">
+                                        <input type="hidden" name="action" value="install">
+                                        <input type="hidden" name="app_id" value="{{ item.id }}">
+
+                                        <span class="has-margin-right-small">
+                                            {{ forms.select({
+                                                'omit_id': true,
+                                                'name': 'app_version',
+                                                'options': item.version_numbers,
+                                            }) }}
+                                        </span>
+
+                                        {{ forms.button({
+                                            'label': install,
+                                        }) }}
+                                    </form>
+                                </div>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

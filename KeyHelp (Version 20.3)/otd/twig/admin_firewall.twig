@@ -1,0 +1,413 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block page_scripts %}
+    <script>
+        var antiLockout = {{ _anti_lockout ? 'true' : 'false' }};
+    </script>
+
+    <script src="/theme/bulma/assets/js/page_firewall.js?{{ _app.cache_control }}"></script>
+{% endblock %}
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    {# Intro #}
+    <div class="has-margin-bottom-large">
+        {{ help|raw }}
+    </div>
+
+{#######################################################################################################################
+    Buttons
+#######################################################################################################################}
+
+    {% if not _is_edit_mode %}
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <strong>
+                        {{ status }}:
+                    </strong>
+                </div>
+                <div class="level-item">
+                    {{ forms.button({
+                        'label': _firewall_enabled ? firewall_enabled : firewall_disabled,
+                        'style': _firewall_enabled ? 'primary' : 'grey',
+                        'url': '?page=' ~ _app.page ~ '&action=' ~ (_firewall_enabled ? 'disable_firewall' : 'enable_firewall'),
+                        'class': 'app-button-with-loading-animation',
+                    }) }}
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    {{ forms.button({
+                        'label': enable_edit_mode,
+                        'style': 'primary',
+                        'url': '?page=' ~ _app.page ~ '&action=enable_edit_mode'
+                    }) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="has-margin-bottom-xlarge"></div>
+
+    {% else %}
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    {{ forms.button({
+                        'label': load_active_rules,
+                        'style': 'primary',
+                        'url': '?page=' ~ _app.page ~ '&action=load_active_rules'
+                    }) }}
+                </div>
+                <div class="level-item">
+                    {{ forms.button({
+                        'label': load_default_rules,
+                        'style': 'primary',
+                        'url': '?page=' ~ _app.page ~ '&action=load_default_rules'
+                    }) }}
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    {{ forms.button({
+                        'label': disable_edit_mode,
+                        'style': 'grey',
+                        'url': '?page=' ~ _app.page ~ '&action=disable_edit_mode'
+                    }) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    {{ forms.button({
+                        'label': apply_changes,
+                        'style': 'primary',
+                        'url': '?page=' ~ _app.page ~ '&action=apply_changes',
+                        'class': 'app-button-with-loading-animation',
+                    }) }}
+                </div>
+                <div class="level-item">
+                    {{ forms.button({
+                        'label': discard_changes,
+                        'style': 'secondary',
+                        'url': '?page=' ~ _app.page ~ '&action=discard_changes'
+                    }) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    {{ forms.button({
+                        'label': add_rule,
+                        'style': 'primary',
+                        'url': '?page=' ~ _app.page ~ '&action=add'
+                    }) }}
+                </div>
+                <div class="level-item">
+                    {{ forms.button({
+                        'label': delete_selected,
+                        'style': 'secondary',
+                        'modal': 'app-modal-delete-selection',
+                    }) }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+
+
+{#######################################################################################################################
+    Tables
+#######################################################################################################################}
+
+    <form id="form-firewall" action="?page={{ _app.page }}&action=delete" method="post">
+
+        {% for _direction in _traffic_directions %}
+
+            <h2 class="title is-5 has-margin-bottom-medium {% if not loop.first %}has-margin-top-large{% endif %}">
+                {{ _direction.label }}
+            </h2>
+
+            <div class="card">
+                <div class="card-content">
+
+                    {% include 'includes/scroll_table_container_buttons.twig' %}
+
+                    <div class="table-container">
+                        <table class="table is-fullwidth is-striped is-hoverable has-valigned-cells">
+                            <thead>
+                                <tr>
+                                    <th style="width: 6%">
+                                        {{ position }}
+                                    </th>
+                                    <th style="width: 22%">
+                                        {{ name }}
+                                    </th>
+                                    <th style="width: 10%">
+                                        {{ action }}
+                                    </th>
+                                    <th style="width: 18%">
+                                        {{ ports }}
+                                    </th>
+
+                                    {% if _direction.has_sources %}
+                                        <th>{{ sources }}</th>
+                                    {% endif %}
+
+                                    {% if _direction.has_destinations %}
+                                        <th>{{ destinations }}</th>
+                                    {% endif %}
+
+                                    {% if _is_edit_mode %}
+                                        <th class="is-narrow">
+                                            {{ options }}
+                                        </th>
+                                        <th class="is-narrow">
+                                            <input class="app-check-all" type="checkbox">
+                                        </th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in _direction.rules %}
+                                    <tr>
+                                        {# Configuration #}
+                                        <td style="display: none">
+                                            <input type="text" name="config_id" value="{{ item.id }}">
+                                            <input type="text" name="config_name" value="{{ item.name }}">
+                                        </td>
+                                        <td>
+                                            {% if _is_edit_mode %}
+                                                {{ forms.select({
+                                                    'name': 'position',
+                                                    'options': _direction.position_options,
+                                                    'selected': item.position
+                                                }) }}
+                                            {% else %}
+                                                {{ item.position }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.name }}</td>
+                                        <td class="has-no-wrap">
+                                            {% include 'includes/icon_firewall.twig' with { '_type': item.action } %}
+                                            {{ item.action_label }}
+                                        </td>
+                                        <td>
+                                            {% if item.tcp_ports is empty and item.udp_ports is empty %}
+                                                <span class="has-text-grey-light">—</span>
+                                            {% else %}
+                                                {% if item.tcp_ports %}
+                                                    <b>TCP:</b> {{ item.tcp_ports|join(', ') }}
+                                                {% endif %}
+
+                                                {% if item.tcp_ports and item.udp_ports %}
+                                                    <span class="has-margin-right-small"></span>
+                                                {% endif %}
+
+                                                {% if item.udp_ports %}
+                                                    <b>UDP:</b> {{ item.udp_ports|join(', ') }}
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+
+                                        {% if _direction.has_sources %}
+                                            <td>
+                                                {% if item.sources is empty %}
+                                                    <span class="has-text-grey-light">—</span>
+                                                {% else %}
+                                                    {% if item.sources|length > 15 %}
+                                                        {% for s in item.sources|slice(0, 15)  %}
+                                                            {{ s }},
+                                                        {% endfor %}
+                                                        ...
+                                                    {% else %}
+                                                        {{ item.sources|join(', ') }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+
+                                        {% if _direction.has_destinations  %}
+                                            <td>
+                                                {% if item.destinations is empty %}
+                                                    <span class="has-text-grey-light">—</span>
+                                                {% else %}
+                                                    {% if item.destinations|length > 15 %}
+                                                        {% for d in item.destinations|slice(0, 15)  %}
+                                                            {{ d }},
+                                                        {% endfor %}
+                                                        ...
+                                                    {% else %}
+                                                        {{ item.destinations|join(', ') }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+
+                                        {% if _is_edit_mode %}
+                                            <td class="is-narrow">
+                                                {% include 'includes/icon.twig' with {
+                                                    '_type': 'edit',
+                                                    '_url': '?page=' ~ _app.page ~ '&action=edit&id=' ~ item.id
+                                                } %}
+
+                                                <span class="app-modal-delete-single-trigger">
+                                                    {% include 'includes/icon.twig' with {
+                                                        '_type': 'delete',
+                                                        '_url': 'javascript:void(0)'
+                                                    } %}
+                                                </span>
+                                            </td>
+                                            <td class="has-no-wrap">
+                                                <label>
+                                                    <input type="checkbox" name="ids[]" value="{{ item.id }}">
+                                                </label>
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+
+                                <tr>
+                                    <td></td>
+                                    <td class="has-text-weight-bold">
+                                        {{ default_policy }}
+                                    </td>
+                                    <td class="has-no-wrap">
+                                        {% include 'includes/icon_firewall.twig' with { '_type': _direction.default.action } %}
+                                        {{ _direction.default.action_label }}
+                                    </td>
+                                    <td colspan="{{ _direction.has_sources and _direction.has_destinations ? '3' : '2' }}"></td>
+                                    {% if _is_edit_mode %}
+                                        <td>
+                                            {% include 'includes/icon.twig' with {
+                                                '_type': 'edit',
+                                                '_url': '?page=' ~ _app.page ~ '&action=edit&id=' ~ _direction.default.id
+                                            } %}
+                                        </td>
+                                        <td></td>
+                                    {% endif %}
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="42" class="has-text-grey-light">
+                                        {{ _direction.rules|length }} {{ items_total }}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        {% endfor %}
+
+    </form>
+
+{#######################################################################################################################
+    Modals
+#######################################################################################################################}
+
+    <div id="app-modal-delete-selection" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">{{ delete_selected }}</p>
+                <button class="delete app-modal-close" type="button"></button>
+            </header>
+            <div class="modal-card-body">
+                <p class="has-text-centered">
+                    {{ are_you_sure_delete_selection }}
+                </p>
+            </div>
+            <footer class="modal-card-foot">
+                {{ forms.button({'label': yes, 'style': 'primary', 'data': { 'submit-form': 'form-firewall' } }) }}
+                {{ forms.button({'label': cancel, 'class': 'app-modal-close', 'type': 'button' }) }}
+            </footer>
+        </div>
+    </div>
+
+
+    <form action="?page={{ _app.page }}&action=delete" method="post">
+        <input type="hidden" name="ids[]" value="___unset___">
+
+        <div id="app-modal-delete-single" class="modal">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">{{ delete_selected }}</p>
+                    <button class="delete app-modal-close" type="button"></button>
+                </header>
+                <div class="modal-card-body">
+                     <div class="has-text-centered">
+                        <p>{{ name }}</p>
+                        <p class="app-rule-name has-text-weight-bold has-margin-top-xsmall has-margin-bottom-medium"></p>
+                        <p>{{ are_you_sure_delete_single }}</p>
+                    </div>
+                </div>
+                <footer class="modal-card-foot">
+                    {{ forms.button({'label': yes, 'style': 'primary' }) }}
+                    {{ forms.button({'label': cancel, 'class': 'app-modal-close', 'type': 'button' }) }}
+                </footer>
+            </div>
+        </div>
+    </form>
+
+
+    <div id="app-modal-anti-lockout" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">{{ preventing_lockout }}</p>
+            </header>
+            <div class="modal-card-body">
+                <div class="has-text-centered">
+                    <p>{{ preventing_lockout_help|raw }}</p>
+                    <p class="has-text-weight-bold has-margin-top-medium">
+                        {{ remain_on_this_page|raw }}
+                    </p>
+
+                    <div class="has-margin-top-medium">
+                        <div id="app-anti-lockout-loading" class="is-loading has-padding-large">
+                            <span id="app-anti-lockout-status-waiting">{{ waiting }}</span>
+                            <span id="app-anti-lockout-status-checking" style="display: none">{{ checking }}</span>
+                        </div>
+
+                        <div id="app-anti-lockout-error" class="has-text-weight-bold has-text-danger" style="display: none">
+                            <div id="app-anti-lockout-error-message">
+                                <!-- filled by javascript -->
+                            </div>
+                            {{ preventing_lockout_failed|raw }}
+                        </div>
+
+                        <div id="app-anti-lockout-success" class="has-text-weight-bold has-text-success" style="display: none">
+                            {{ preventing_lockout_succeeded }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="modal-card-foot">
+                <!-- it looks better with footer ;) -->
+            </footer>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,568 @@
+{% extends 'base/intern.twig' %}
+
+{% block page_scripts %}
+    <script>
+        clock('#app-server-time');
+    </script>
+
+    <script src="/theme/otd/assets/js/page_admin_dashboard.js?{{ _app.cache_control }}"></script>
+{% endblock %}
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+        {# TOP #}
+          {% include 'includes/card_start_stacked_error.twig' with { '_label': 'Error Message !' , '_icon': 'far fa-newspaper'} %}
+
+          {% include 'includes/card_end_stacked.twig' %}
+
+        {% if not _whitelabel.is_hide_news %}
+            {% include 'includes/card_start_stacked_news.twig' with { '_label': news, '_icon': 'far fa-newspaper'} %}
+                <div id="app-news-container">
+                    <div class="has-margin-large has-padding-small">
+                        <!--
+                            Only to have some content, so that loading animation can be displayed.
+                            Will be overriden, when ajax call was finished.
+                        -->
+                    </div>
+                </div>
+            {% include 'includes/card_end_stacked.twig' %}
+        {% endif %}
+
+<div class="columns">
+    <div class="column is-7-tablet is-7-desktop is-7-widescreen is-6-fullhd">
+
+        {###############################################################################################################
+            Left | 1st
+        ###############################################################################################################}
+
+        {% include 'includes/card_start_stacked_server.twig' with {
+            '_label': server,
+            '_icon': 'fas fa-server',
+            '_is_collapsible': true,
+            '_cookie_name': 'server'
+        } %}
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <tbody>
+                        <tr>
+                            <th>{{ server_time }}</th>
+                            <td>
+                                <span id="app-server-time">
+                                    {{ _server_time }}
+                                </span>
+                                ({{ _time_zone }})
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ uptime }}</th>
+                            <td>
+                                <ul class="horizontal-separated-list">
+                                    <li>{{ _uptime.days }} {{ days }}</li>
+                                    <li>{{ _uptime.hours }} {{ hours }}</li>
+                                    <li>{{ _uptime.minutes }} {{ minutes }}</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ hostname }}</th>
+                            <td>{{ _hostname }}</td>
+                        </tr>
+                        <tr>
+                            <th>{{ ip_addresses }}</th>
+                            <td>
+                                <ul class="horizontal-separated-list">
+                                    {% for ip_address in _ip_addresses %}
+                                    <li>{{ ip_address }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                        {% if _ssh_fingerprint %}
+                            <tr>
+                                <th>
+                                    {{ ssh_fingerprint }}
+                                </th>
+                                <td>
+                                    <ul class="horizontal-separated-list">
+                                    {% for _algorithm, _formats in _ssh_fingerprint %}
+                                        {% set _tippy_content %}
+                                            <table class="table is-narrow">
+                                            {% for _format, _key in _formats %}
+                                                <tr>
+                                                    <th>{{ _format }}</th>
+                                                    <td class="is-family-monospace">{{ _key }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </table>
+                                        {% endset %}
+                                        <li>
+                                            <a href="javascript:void(0)" class="app-tooltip-click" data-tippy-maxWidth="500px" data-tippy-content="{{ _tippy_content|escape('html') }}">{{ _algorithm }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <th>CPU</th>
+                            <td>
+                                {% include 'includes/chunk_cpu_info.twig' with { '_cpu': _cpu } %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ cpu_load }}</th>
+                            <td>
+                                {% include 'includes/chunk_cpu_load.twig' with { '_load': _load } %}
+
+                                {% if _is_lxc_virtualization %}
+                                    <div class="has-text-grey">
+                                        <small>
+                                            {{ lxc_load_incorrect }}
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ process_count }}</th>
+                            <td>
+                                <ul class="horizontal-separated-list">
+                                    <li>{{ _process_count }}</li>
+                                    <li><a href="?page=admin_process_manager">{{ manage }}</a></li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ emails_in_queue }}</th>
+                            <td>
+                                <ul class="horizontal-separated-list">
+                                    <li>{{ _emails_in_queue }}</li>
+                                    <li><a href="?page=admin_mailqueue">{{ manage }}</a></li>
+                                </ul>
+                            </td>
+                        </tr>
+
+                        {% for usage_value in _usage_values %}
+                            <tr>
+                                <th>{{ usage_value.label }}</th>
+                                <td>
+                                    <ul class="horizontal-separated-list">
+                                        <li><b>{{ free }}:</b> {{ usage_value.free }}</li>
+                                        <li><b>{{ used }}:</b> {{ usage_value.used }}</li>
+                                        <li><b>{{ total }}:</b> {{ usage_value.total }}</li>
+                                    </ul>
+                                    {{ macros.usage_indicator({
+                                        'percent': usage_value.percent,
+                                    }) }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% include 'includes/card_end_stacked.twig' %}
+
+        {###############################################################################################################
+            Left | 2nd
+        ###############################################################################################################}
+
+        {% include 'includes/card_start_stacked_resources.twig' with {
+            '_label': resources,
+            '_icon': 'fas fa-tachometer-alt',
+            '_has_margin_top': true,
+            '_is_collapsible': true,
+            '_cookie_name': 'resources'
+        } %}
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <tbody>
+                        <tr>
+                            <th>
+                                {{ admin_accounts }}
+                            </th>
+                            <td>
+                                {{ _admin_accounts }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ user_accounts }}
+                            </th>
+                            <td>
+                                {{ _user_accounts }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ domains }}
+                            </th>
+                            <td>
+                                {{ _domains }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ subdomains }}
+                            </th>
+                            <td>
+                                {{ _subdomains }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ email_accounts }}
+                            </th>
+                            <td>
+                                {{ _email_accounts }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ email_addresses }}
+                            </th>
+                            <td>
+                                {{ _email_addresses }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ databases }}
+                            </th>
+                            <td>
+                                {{ _databases }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ ftp_users }}
+                            </th>
+                            <td>
+                                {{ _ftp_users }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ scheduled_tasks }}
+                            </th>
+                            <td>
+                                {{ _scheduled_tasks }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ consumed_disk_space }}
+                            </th>
+                            <td>
+                                {{ _consumed_disk_space }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                {{ traffic }} / {{ _traffic_month }}
+                            </th>
+                            <td>
+                                {{ _traffic }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% include 'includes/card_end_stacked.twig' %}
+
+        {###############################################################################################################
+            Left | 3st
+        ###############################################################################################################}
+
+        {% include 'includes/card_start_stacked_applications.twig' with {
+            '_label': applications,
+            '_icon': 'fas fa-desktop',
+            '_has_margin_top': true,
+            '_is_collapsible': true,
+            '_cookie_name': 'applications'
+        } %}
+            <div class="has-margin-bottom-medium" style="display: none">
+                <div id="app-software-updates-available" class="has-text-centered" style="display: none">
+
+                    <!-- additional content added by javascript -->
+
+                    <div id="app-dist-upgrade-note" class="has-text-centered" style="display: none">
+                        (<a href="javascript:void(0)" class="app-tooltip-click" data-tippy-content="{{ update_note_help }}">{{ why_i_see_this_hint }}</a>)
+                    </div>
+
+                    {% if _is_server_update_disabled %}
+                        <div class="has-text-danger has-text-weight-bold">
+                            {{ auto_update_disabled }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div id="app-reboot-required" class="has-text-centered has-margin-top-medium" style="display: none">
+                    <div class="has-text-danger has-text-weight-bold">
+                        {{ reboot_required }}
+                    </div>
+                    <div class="has-margin-top-xsmall">
+                        {{ forms.button({
+                            'label': reboot_server,
+                            'style': 'primary',
+                            'url': '?page=admin_configuration&configure=reboot'
+                        }) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <tbody>
+                        {% for key, item in _applications %}
+                            <tr>
+                                {% if key == 'keyhelp' %}
+                                    <th>
+                                        {{ _whitelabel.product_name ? administration_panel : 'KeyHelp' }}
+                                    </th>
+                                    <td class="has-text-centered">
+                                        {% if _whitelabel.product_name and _whitelabel.favicon %}
+                                            <img class="svg-vendor-logo" src="{{ _whitelabel.favicon }}">
+                                        {% else %}
+                                            <img class="svg-vendor-logo" src="/theme/bulma/assets/img/keyhelp-logo.svg?{{ _app.cache_control }}" alt="">
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <ul class="horizontal-separated-list">
+                                            <li>
+                                                {{ item.version }}
+                                                <span class="has-text-grey">
+                                                    <small>
+                                                        (Build {{ item.build }})
+                                                    </small>
+                                                </span>
+                                            </li>
+                                            {% if not _whitelabel.is_hide_changelog %}
+                                                <li><a href="https://changelog.keyhelp.de" target="_blank" rel="nofollow noopener noreferrer">{{ changelog }}</a></li>
+                                            {% endif %}
+                                        </ul>
+
+                                        <div id="app-keyhelp-update-available" class="has-text-success has-text-weight-bold" style="display: none">
+                                            {{ update_available }}
+                                        </div>
+
+                                        <div id="app-keyhelp-update-info-error" class="has-text-danger has-text-weight-bold" style="display: none">
+                                            {{ update_info_error }}
+                                        </div>
+
+                                        {% if _is_panel_update_disabled %}
+                                            <div class="has-text-danger has-text-weight-bold">
+                                                {{ auto_update_disabled }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                {% else %}
+                                    <th>{{ item.label }}</th>
+                                    <td class="has-text-centered">
+                                        <img class="svg-vendor-logo" src="/theme/bulma/assets/img/vendor/{{ item.id }}.svg?{{ _app.cache_control }}" alt="">
+                                    </td>
+                                    <td>
+                                        {{ item.version }}
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% include 'includes/card_end_stacked.twig' %}
+
+    </div>
+
+
+    <div class="column">
+
+        {###############################################################################################################
+            Right | 1st
+        ###############################################################################################################}
+
+        {% include 'includes/card_start_stacked_notes.twig' with {
+            '_label': notes,
+            '_icon': 'fas fa-edit',
+            '_is_collapsible': true,
+            '_cookie_name': 'notes'
+        } %}
+            {# "<div>" | Introducing div comes from card_start_stacked.twig #}
+                <div id="app-notes" class="has-pre-wrap">{{ _notes }}</div>
+                <textarea id="app-notes-textarea" class="textarea app-auto-resize" style="display: none"></textarea>
+            </div>
+            <div class="card-footer">
+                <div class="card-footer-item has-text-right">
+                    <a href="javascript:void(0)" id="app-edit-notes">
+                        {{ edit }}
+                    </a>
+                    <a href="javascript:void(0)" id="app-save-notes" style="display: none">
+                        {{ save }}
+                    </a>
+                </div>
+            {# "</div> | The card_end_stacked.twig takes care of closing the div container #}
+        {% include 'includes/card_end_stacked.twig' %}
+
+
+
+        {###############################################################################################################
+            Right | 2nd
+        ###############################################################################################################}
+
+        {% if _service_config %}
+
+            {% include 'includes/card_start_stacked_service.twig' with {
+                '_label': service_status,
+                '_icon': 'fas fa-heartbeat',
+                '_has_margin_top': true,
+                '_is_collapsible': true,
+                '_cookie_name': 'service_status'
+            } %}
+                {# "<div>" | Introducing div comes from card_start_stacked.twig #}
+
+                    <div id="app-service-status-error" class="has-text-danger" style="display: none">
+                        AJAX_ERROR
+                    </div>
+
+                    <div id="app-service-status-content" class="table-container">
+                        <table class="table is-fullwidth is-striped is-hoverable has-valigned-cells">
+                            <thead>
+                                <tr>
+                                    <th>{{ service }}</th>
+                                    <th>{{ port }}</th>
+                                    <th>
+                                        {{ status }}
+                                        <span class="icon is-small has-text-grey-light has-margin-left-xsmall">
+                                            {# While using an other nested div, the table cell width will not "jump" if the loader is toggled #}
+                                            <span id="app-service-status-loading" style="display: none">
+                                                <i class="fas fa-sync-alt fa-spin"></i>
+                                            </span>
+                                        </span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in _service_config %}
+                                    <tr class="app-service-status-item" data-port="{{ item.port }}">
+                                        <th>{{ item.name }}</th>
+                                        <td>{{ item.port }}</td>
+                                        <td>
+                                            <span class="app-service-status-item-loading">
+                                                {# Only used on initial page load. #}
+                                                <span class="icon is-small has-text-grey-light">
+                                                    <i class="fas fa-sync-alt fa-spin"></i>
+                                                </span>
+                                            </span>
+                                            <div class="has-text-weight-bold">
+                                                <span class="has-text-success app-service-status-item-online" style="display: none">{{ online }}</span>
+                                                <span class="has-text-danger app-service-status-item-offline" style="display: none">{{ offline }}</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <div class="card-footer-item has-text-right">
+                        <a href="?page=admin_configuration&configure=service_status">
+                            {{ configure }}
+                        </a>
+                    </div>
+                {# "</div> | The card_end_stacked.twig takes care of closing the div container #}
+            {% include 'includes/card_end_stacked.twig' %}
+
+        {% endif %}
+
+        {###############################################################################################################
+            Right | 3rd
+        ###############################################################################################################}
+
+    {% include 'includes/card_start_stacked_ts3.twig' with { '_label': 'TeamSpeak3 Control', '_icon': 'fas fa-microphone-alt fa-lg', '_has_margin_top': true } %}
+      {% include 'includes/status_ts3.twig' %}
+    {% include 'includes/card_end_stacked.twig' %}
+
+  {# 1.4 (Status Raid) #}
+	  {% include 'includes/card_start_stacked_raid.twig' with { '_label': 'Raid Überwachung', '_icon': 'fas fa-first-aid fa-lg', '_has_margin_top': true } %}
+      {% include 'includes/status_raid.twig' %}
+    {% include 'includes/card_end_stacked.twig' %}
+
+  {# 1.5 (Status S.M.A.R.T) #}
+	  {% include 'includes/card_start_stacked_smart.twig' with { '_label': 'S.M.A.R.T Überwachung', '_icon': 'fas fa-first-aid fa-lg', '_has_margin_top': true } %}
+      {% include 'includes/status_smart.twig' %}
+    {% include 'includes/card_end_stacked.twig' %}
+
+  {# 1.6 (Status Diskspace) #}
+	  {% include 'includes/card_start_stacked_diskspace.twig' with { '_label': 'Festplatten Auslastung', '_icon': 'fas fa-hdd fa-lg', '_has_margin_top': true } %}
+      {% include 'includes/status_diskspace.twig' %}
+    {% include 'includes/card_end_stacked.twig' %}
+
+  {# 1.7 (Status Temperatur) #}
+	  {% include 'includes/card_start_stacked_temperatur.twig' with { '_label': 'Temperaturen', '_icon': 'fas fa-temperature-low fa-lg', '_has_margin_top': true } %}
+      {% include 'includes/status_temperatur.twig' %}
+    {% include 'includes/card_end_stacked.twig' %}
+
+    </div>
+</div>
+
+{# Custom Footer Start #}
+    {% include 'includes/card_start_stacked_cr.twig' with { '_label': 'Copyright 2020 - Custom Admin Dashboard by OlliTheDarkness & Moritz83 for KeyHelp', '_icon': 'far fa-copyright'} %}
+              <div id="CopyRight-OTD">
+                <div class="table-container">
+                  <table class="table is-fullwidth is-striped">
+                      <tbody>
+                        <tr>
+                            <th>
+                              <h1 class="title"> <u> Entwickler </u> </h1>
+                            </th>
+                        </tr>
+                        <tr>
+                            <td>
+                              Admin Panel by <a href="https://www.KeyHelp.de">KeyHelp</a> / <a href="https://www.KeyWeb.de">KeyWeb</a> | <a href="https://Community.KeyHelp.de">Zur Community</a>
+                              <br />
+                              Admin Panel Custom DashBoard by <a href="https://community.keyhelp.de/memberlist.php?mode=viewprofile&u=799">OlliTheDarkness</a> & <a href="https://community.keyhelp.de/memberlist.php?mode=viewprofile&u=2972">Moritz83</a> | <a href="https://github.com/OlliTheDarkness2020/KeyHelp-AdminDash-Cust.Theme">GitHub Repository</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                              <h1 class="title"> <u> Version </u> </h1>
+                            </th>
+                        </tr>
+                        <tr>
+                            <td>
+                               Admin DashBoard - Version <b id="DashVersion">...</b> - Release Update Ankündigungen im KeyHelp Forum | <a href="https://Community.KeyHelp.de">Forum / Community</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                              <h1 class="title"> <u> Kontakt bei Fragen / Anregungen / Lob / Kritik / Sonstiges </u> </h1>
+                            </th>
+                        </tr>
+                        <tr>
+                            <td>
+                               <a href="mailto:&#069;&#110;&#116;&#119;&#105;&#099;&#107;&#108;&#117;&#110;&#103;&#045;&#075;&#072;&#045;&#065;&#100;&#109;&#105;&#110;&#068;&#097;&#115;&#104;&#064;&#083;&#107;&#114;&#105;&#112;&#116;&#070;&#097;&#099;&#116;&#111;&#114;&#121;&#046;&#100;&#101;?subject=Rückmeldung%20zu%20KeyHelp%20AdminDash&body=Was%20möchten%20Sie%20uns%20sagen?"> <b>Email</b> </a>
+                               | |
+                               <a href="https://community.keyhelp.de/ucp.php?i=pm&mode=compose&u=799"> <b>Private Nachricht im Forum</b> </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                              <h1 class="title"> <u> Wichtige Informationen </u> </h1>
+                            </th>
+                        </tr>
+                        <tr>
+                            <td>
+                               <b> Die KeyWeb AG steht mit dem Custom Admin DashBoard in keinem direkten Zusammenhang, die Idee & Entwicklung erfolgt frei und ausschließlich durch die Community.</b>
+                            </td>
+                        </tr>
+                      </tbody>
+                  </table>
+                </div>
+              </div>
+    {% include 'includes/card_end_stacked.twig' %}
+{# Custom Footer Ende #}
+
+{% endblock %}

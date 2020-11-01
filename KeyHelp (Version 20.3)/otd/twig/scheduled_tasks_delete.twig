@@ -1,0 +1,31 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block content %}
+
+    {% set _config = {
+        'type': { 'label': task_type }
+    } %}
+
+    {% if _app.area == 'admin' %}
+        {% set _config = _config|merge({
+            'owner': { 'label': owner }
+        }) %}
+    {% endif %}
+
+    {% set _config = _config|merge({
+        'command':      { 'label': command },
+        'description':  { 'label': description },
+        'schedule':     { 'label': schedule },
+        'notification': { 'label': notification }
+    }) %}
+
+    {% include 'includes/delete_page.twig' with {
+        '_action': '?page=' ~ _app.page ~ '&action=delete',
+        '_back_page': _app.page,
+        '_config': _config,
+        '_items': _scheduled_task_items
+    } %}
+
+{% endblock %}

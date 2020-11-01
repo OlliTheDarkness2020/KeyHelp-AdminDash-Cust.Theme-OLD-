@@ -1,5 +1,36 @@
 KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
+<h2><b><u>(Release-Version) Änderungen 01.11.2020 (Version 1.2.5)</u></b></h2>
+
+<b>GIT</b>
+<ul>
+  <li> Ordner für KH 20.3 erstellt. </li>
+
+  <li> Daten für 20.3 hochgeladen. </li>
+</ul>
+
+<br><br>
+
+<b>Dash Panel</b>
+<ul>
+<li> Anpassung an KH Update 20.3. </li>
+
+<li> Entfernung des Service / Port Status. (Ersetzt durch KH eigene Funktion, danke an Alex) </li>
+
+<li> Allgemeine Bereinigung des Codes. </li>
+
+</ul>
+
+<br>
+
+<b> <u>WICHTIG</u> </b>
+
+<b>BITTE DIE NEUE setting.php benutzen !</b>
+
+<br>
+<hr>
+<br>
+
 <h2><b><u>(Release-Version) Änderungen 14.08.2020 (Version 1.2.4)</u></b></h2>
 
 <b>GIT</b>

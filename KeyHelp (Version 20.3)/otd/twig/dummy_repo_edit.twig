@@ -1,0 +1,121 @@
+{% extends 'base/intern.twig' %}
+
+
+{% block page_scripts %}
+    <script src="/theme/bulma/assets/js/page_backup_repo.js?{{ _app.cache_control }}"></script>
+{% endblock %}
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+
+    {% include 'includes/card_start.twig' %}
+
+        <p class="has-margin-bottom-large">
+            __Ein repository ist ein speicherort für ihre backups, der zugirff auf die Daten innerhalb dieses Ordners ist nur mit hilfe eines Passworts möglich.<br>
+            Wichtig, vergessen Sie ihr passwort nicht, oder sie können nicht mehr auf die daten zugreifen
+            Sie können auch ein bereits bestehendes Repository hinzufügen / importieren.
+        </p>
+
+        <form action="?page={{ _app.page }}&action={{ _action }}" method="post" autocomplete="off">
+            <input type="hidden" name="submit" value="1">
+            <input type="hidden" name="id" value="{{ _id }}">
+
+            {{ forms.input_wrapped({
+                'label': name,
+                'name': 'name',
+                'type': 'text',
+                'value': _name,
+                'is_required': true,
+            }) }}
+
+            {% include 'includes/form_password.twig' with { '_leave_empty': _action == 'repo_edit' } %}
+
+            {{ forms.select_wrapped({
+                'label': repository_type,
+                'name': 'type',
+                'options': {'': '- ' ~ please_select ~ ' -'}|merge(_repository_types),
+                'selected': _type,
+                'is_required': true,
+            }) }}
+
+        {###############################################################################################################
+            Local
+        ###############################################################################################################}
+
+            <div class="app-show-with-type-local" style="display: none">
+                <p>
+                    __Backups werden im Ordner /backup/ ihres Homeverzeichnisses abgelegt und können bei Bedarf heruntergeladen werden. (client)
+                </p>
+
+                <p>
+                    __Backups werden im Ordner /backup/restic abgelegt. (admin)
+                </p>
+
+                {% include 'includes/form_browse_directory.twig' with {
+                    '_append_directory': '/backup',
+                    '_name': 'local_path',
+                    '_value': _local_path,
+                    '_purpose': 'backup'
+                } %}
+            </div>
+
+        {###############################################################################################################
+            SFTP
+        ###############################################################################################################}
+
+            <div class="app-show-with-type-sftp" style="display: none">
+                {{ forms.input_wrapped({
+                    'label': '__Host',
+                    'name': 'sftp_host',
+                    'value': _sftp_host,
+                    'type': 'text',
+                }) }}
+
+                {{ forms.input_wrapped({
+                    'label': '__Port',
+                    'name': 'sftp_port',
+                    'value': _sftp_port,
+                    'type': 'number',
+                }) }}
+
+                {{ forms.input_wrapped({
+                    'label': '__Verzeichnis auf dem Server',
+                    'name': 'sftp_path',
+                    'value': _sftp_path,
+                    'type': 'text',
+                }) }}
+
+                {{ forms.input_wrapped({
+                    'label': '__User',
+                    'name': 'sftp_user',
+                    'value': _sftp_user,
+                    'type': 'text',
+                }) }}
+
+                {{ forms.input_wrapped({
+                    'label': '__Public Key',
+                    'name': 'field-1',
+                    'type': 'text',
+                    'is_readonly': true,
+                    'addons': {
+                        'right': {
+                            'type': 'action',
+                            'label': copy,
+                            'action': 'app-copy-to-clipboard'
+                        }
+                    }
+                }) }}
+            </div>
+
+
+
+            {% include 'includes/cta.twig' with { '_back': { 'target': _app.page }, '_confirm': true } %}
+
+        </form>
+
+    {% include 'includes/card_end.twig' %}
+
+{% endblock %}

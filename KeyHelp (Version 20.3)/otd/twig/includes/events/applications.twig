@@ -1,0 +1,26 @@
+<p class="has-text-weight-bold has-margin-bottom-medium">
+    {{ _name }}, {{ version }} {{ _version }}
+</p>
+
+<p class="has-margin-bottom-medium">
+    <b>{{ directory }}:</b> {{ _directory }}
+    <br>
+    <b>URL:</b> <a href="{{ _url }}" target="_blank" rel="nofollow noopener noreferrer">{{ _url }}</a>
+</p>
+
+<p>
+    <span class="has-text-weight-bold">
+        {% if _is_finished %}
+            {{ _is_success ? install_succeded : install_failed }}
+        {% else %}
+            {{ _is_processing ? install_in_progress : install_imminent }}
+        {% endif %}
+    </span>
+    {{ _admin_login|raw }}
+</p>
+
+{% if _is_finished and not _is_success %}
+    <p class="has-margin-top-medium">
+        <b>{{ error_message }}</b> {{ _error_message }}
+    </p>
+{% endif %}

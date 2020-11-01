@@ -1,0 +1,32 @@
+<div class="card has-background-white">
+    <div class="card-header">
+        {% if _icon %}
+            <div class="card-header-icon">
+                <span class="icon is-medium">
+                    <i class="{{ _icon }} fa-lg"></i>
+                </span>
+            </div>
+        {%  endif %}
+        <div class="card-header-title equal-height">
+            {{ _label }}
+        </div>
+        <div class="card-header-icon">
+            <span data-open-modal="{{ _edit_modal }}">
+                {% include 'includes/icon.twig' with {
+                    '_label': '',
+                    '_type': 'edit',
+                    '_url': 'javascript:void(0)'
+                } %}
+            </span>
+
+            <span data-open-modal="{{ _delete_modal }}">
+                {% include 'includes/icon.twig' with {
+                    '_label': '',
+                    '_type': 'delete',
+                    '_url': 'javascript:void(0)'
+                } %}
+            </span>
+        </div>
+    </div>
+    <div class="card-content">
+

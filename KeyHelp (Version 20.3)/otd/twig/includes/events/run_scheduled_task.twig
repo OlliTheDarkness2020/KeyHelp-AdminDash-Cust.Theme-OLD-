@@ -1,0 +1,20 @@
+<p>
+    <b>{{ command }}:</b> {{ _command }}
+    <br>
+    <b>{{ status }}:</b> {{ _status }}
+<p>
+
+{% if _is_finished %}
+    <p>
+        <b>{{ runtime }}:</b> {{ _runtime }}
+        <br>
+        <b>{{ return_status_code }}:</b> {{ _exit_code }} ({{ _exit_code == 0 ? success : error }})
+        <br>
+        <b>{{ output }}:</b>
+        {% if _output is empty %}
+            {{ no_output }}
+        {% else %}
+            <pre style="color: inherit" class="has-padding-bottom-none">{{ _output }}</pre>
+        {% endif %}
+    </p>
+{% endif %}

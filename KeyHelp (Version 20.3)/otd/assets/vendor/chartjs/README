@@ -1,0 +1,8 @@
+Version:    2.9.4
+
+Releases:   https://github.com/chartjs/Chart.js/releases
+
+Homepage:   https://www.chartjs.org/
+
+Update:     Just download the File "Chart.min.js" under "Assets" on the GitHub release page.
+            Change capital C to lowercase.
