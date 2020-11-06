@@ -1,0 +1,14 @@
+Version:    5.5.1
+
+Releases:   https://www.tiny.cloud/get-tiny/self-hosted/
+            https://www.tiny.cloud/get-tiny/language-packages/
+            (Does not send notifications via Github)
+
+Homepage:   https://www.tiny.cloud/
+
+Update:     1)      Replace the full content of the folder
+
+            2)      Download the language pack files from the URL above and put them into /langs/.
+            2.1)    Rename language packs to match our language names in KeyHelp
+                    Example: "fr_FR" -> "fr"
+

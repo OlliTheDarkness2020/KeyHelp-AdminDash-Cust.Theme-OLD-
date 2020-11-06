@@ -1,0 +1,13 @@
+{% apply spaceless %}
+
+    {% if _type == 'allow' %}
+        {% set color = 'has-text-success' %}
+    {% elseif _type == 'deny' or _type == 'reject' %}
+        {% set color = 'has-text-danger' %}
+    {% endif %}
+
+    <span class="icon is-small has-margin-right-xsmall {{ color }}">
+        <i class="fas fa-square"></i>
+    </span>
+
+{% endapply %}

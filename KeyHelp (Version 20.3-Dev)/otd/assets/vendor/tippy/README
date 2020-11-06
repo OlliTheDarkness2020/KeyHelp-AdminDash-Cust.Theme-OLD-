@@ -1,0 +1,31 @@
+Version:    6.2.7 (Tippy.js)
+            2.5.3 (Popper.js)
+
+Releases:   https://github.com/atomiks/tippyjs/releases
+
+Homepage:   https://atomiks.github.io/tippyjs/
+
+Update:     Use the following CDN to receive the latest minified files and replace the existing ones.
+
+            Popper.js
+                https://unpkg.com/@popperjs/core@2
+
+                Remove the last line: "//# sourceMappingURL=popper.min.js.map"
+
+            Tippy.js
+                https://unpkg.com/tippy.js@6
+
+                Remove the last line: "//# sourceMappingURL=tippy-bundle.umd.min.js.map"
+
+            CSS
+                https://unpkg.com/tippy.js@6/themes/light-border.css
+
+                The CSS file should be put into "assets/scss/partials/_vendor_tippy"
+
+                Modify the CSS, within ".tippy-box":
+
+                    Add "white-space: normal;"
+
+                    Replace "color: #333;" with "color: $text"
+
+                    Replace "box-shadow: 0 4px 14px -2px rgba(0, 8, 16, .08);" with "box-shadow: $kh-shadow;"

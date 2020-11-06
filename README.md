@@ -1,6 +1,28 @@
 KeyHelp Theme Erweiterung zur erweiterten Anzeige (Raid, S.M.A.R.T, TS3 etc.)
 
 
+<h2><b><u>(Dev-Version) Änderungen 06.11.2020 (Version 1.2.6-Dev)</u></b></h2>
+
+<b>Dash Panel</b>
+<ul>
+
+<li> Anpassung für KH 20.3 </li>
+
+</ul>
+
+<br>
+
+<b>ToDo (!)</b>
+<ul>
+
+<li> Deaktivierung von nicht verwendeten Bereichen. (Keine Einmalabfrage) </li>
+<li> Leistungsoptimierung </li>
+
+</ul>
+<br>
+<hr>
+<br>
+
 <h2><b><u>(Dev-Version) Änderungen 05.09.2020 (Version 1.2.5Dev)</u></b></h2>
 
 <b>Dash Panel</b>

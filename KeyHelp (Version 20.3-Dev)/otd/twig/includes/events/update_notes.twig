@@ -1,0 +1,19 @@
+<p class="has-text-weight-bold">{{ update_notes }}</p>
+
+{% for item in _updates %}
+    <div class="has-margin-top-medium has-margin-x-medium">
+        <p>
+            <b>{{ item.version }}</b>
+            <br>
+            <small>{{ item.date }}</small>
+        </p>
+        {% if item.notes %}
+            <p class="has-margin-top-medium">
+                {{ please_note }}:
+                <br>
+                {{ item.notes|raw }}
+            </p>
+        {% endif %}
+    </div>
+{% endfor %}
+

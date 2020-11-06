@@ -1,0 +1,1826 @@
+{% extends 'base/intern.twig' %}
+
+
+{% block page_scripts %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    {% if _configure == 'php_interpreter' %}
+        <script id="app-interpreter-template" type="text/x-handlebars-template">
+            {% verbatim %}
+                <tr>
+                    <td class="has-padding-x-xsmall">
+                        {{# if is_scheduled }}
+                            {% endverbatim %}{% include 'includes/icon.twig' with { '_type': 'status_processing' } %}{% verbatim %}
+                        {{ else }}
+                            <span class="icon is-medium has-text-grey-lighter">
+                                <i class="fas fa-minus"></i>
+                            </span>
+                        {{/ if }}
+                    </td>
+                    <td class="has-no-wrap">
+                        <strong>{{ main_version }}</strong>
+                        <span class="has-text-grey-light"> / {{ php_version }}</span>
+                    </td>
+                    <td>
+                        {{# if is_eol }}
+                            {% endverbatim %}{{ macros.tag(outdated, 'is-danger') }}{% verbatim %}
+                        {{/ if }}
+                    </td>
+                    <td>
+                        <input type="checkbox" name="install[]" value="{{ main_version }}" {{# if is_scheduled }}checked{{/ if }}>
+                    </td>
+                </tr>
+            {% endverbatim %}
+        </script>
+    {% endif %}
+
+    {% if _configure == 'applications' %}
+        <script>
+            var reloadCache = {{ _applications is empty ? 'true' : 'false' }};
+        </script>
+        <script src="/theme/bulma/assets/js/page_applications.js?{{ _app.cache_control }}"></script>
+    {% endif %}
+
+    {% if _configure == 'system_time' %}
+        <script>
+            select2_prepareSelect('#input-time_zone');
+        </script>
+    {% endif %}
+
+    {% if _configure == 'service_status' %}
+        <script>
+            var serviceConfig = {{ _service_config_json|raw }};
+        </script>
+        <script id="app-service-template" type="text/x-handlebars-template">
+            <div class="columns">
+                <div class="column is-three-fifths has-mobile-top-padding-none" style="padding-bottom: 0px;">
+                    {{ forms.input_wrapped({
+                        'omit_id': true,
+                        'name': 'name',
+                        'type': 'text',
+                        'placeholder': service_name
+                    }) }}
+                </div>
+                <div class="column has-mobile-top-padding-none" style="padding-bottom: 0px;">
+                    {{ forms.input_wrapped({
+                        'omit_id': true,
+                        'name': 'port',
+                        'type': 'number',
+                        'placeholder': port
+                    }) }}
+                </div>
+                <div class="column is-narrow has-mobile-top-padding-none has-text-centered">
+                    {{ forms.button({
+                        'label': remove,
+                        'style': 'secondary',
+                        'type': 'button',
+                        'class': 'app-btn-remove-service'
+                    }) }}
+                </div>
+            </div>
+        </script>
+    {% endif %}
+
+    <script src="/theme/bulma/assets/js/page_configuration.js?{{ _app.cache_control }}"></script>
+{% endblock %}
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    {% include 'includes/card_start.twig' %}
+
+    <form action="?page={{ _app.page }}&configure={{ _configure }}" method="post" autocomplete="off">
+        <input type="hidden" name="submit" value="1">
+
+{#######################################################################################################################
+    Hostname
+#######################################################################################################################}
+
+        {% if _configure == 'hostname' %}
+            {{ forms.input_wrapped({
+                'label': hostname,
+                'help': hostname_help,
+                'name': 'hostname',
+                'value': _new_hostname ? _new_hostname : _hostname,
+                'is_required': true,
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    IP address
+#######################################################################################################################}
+
+        {% if _configure == 'ip_addresses' %}
+            {{ forms.label_wrapped({
+                'label': active_ip_addresses,
+                'help': active_ip_addresses_help,
+            }) }}
+
+            {% set _categories = [{'label': 'IPv4', 'items': _ips['ipv4']}, {'label': 'IPv6', 'items': _ips['ipv6']}] %}
+
+            {% for _category in _categories %}
+                {{ forms.label_wrapped({
+                   'label': _category.label,
+                   'help': select_ip_addresses,
+                }) }}
+
+                {% if _category.items is empty %}
+                    <div class="has-text-grey has-margin-bottom-large">
+                        - {{ no_items_available }} -
+                    </div>
+                {% else %}
+                    {% for _item in _category.items %}
+                        {{ forms.checkbox({
+                            'name': 'ips[]',
+                            'label': _item.ip,
+                            'value': _item.ip,
+                            'is_checked': _item.selected
+                        }) }}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+
+            <div class="has-margin-top-large"></div>
+
+        {% endif %}
+
+{#######################################################################################################################
+    PHP interpreters
+#######################################################################################################################}
+
+        {% if _configure == 'php_interpreter' %}
+            {{ forms.label_wrapped({
+                'label': os_default_version,
+                'value': _os_default_version
+            }) }}
+
+            {{ forms.label_wrapped({
+                'label': installed_interpreters,
+                'help': installed_interpreters_help
+            }) }}
+
+            {% if _interpreters is empty %}
+                <div class="has-text-centered has-text-grey has-margin-bottom-large">
+                    - {{ no_items_available }} -
+                </div>
+            {% else %}
+                {% include 'includes/scroll_table_container_buttons.twig' %}
+                <div class="table-container">
+                    <table class="table is-fullwidth is-hoverable is-striped has-valigned-cells">
+                        <thead>
+                            <tr>
+                                <th class="is-narrow">
+                                    S
+                                </th>
+                                <th class="is-narrow">
+                                    {{ version }}
+                                </th>
+                                <th>
+                                    <!-- eol -->
+                                </th>
+                                <th class="is-narrow">
+                                    {{ used }}
+                                </th>
+                                <th class="is-narrow">
+                                    {{ selectable }}
+                                </th>
+                                <th  class="is-narrow">
+                                    {{ auto_update }}
+                                </th>
+                                <th class="is-narrow">
+                                    {{ uninstall }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in _interpreters %}
+                            <tr>
+                                <td class="has-padding-x-xsmall">
+                                    {% include 'includes/icon.twig' with { '_type': item.status } %}
+                                </td>
+                                <td class="has-no-wrap">
+                                    <strong>{{ item.main_version }}</strong>
+                                    <span class="has-text-grey-light"> / {{ item.php_version }}</span>
+                                </td>
+                                <td>
+                                    {% if item.is_beta %}
+                                        {{ macros.tag('Beta', 'is-warning') }}
+                                    {% endif %}
+                                    {% if item.is_eol %}
+                                        {{ macros.tag(outdated, 'is-danger') }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ item.usage_count }}x
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="selectable[]" value="{{ item.main_version }}" {{ item.is_selectable ? 'checked' }}>
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="auto_update[]" value="{{ item.main_version }}" {{ item.is_auto_update ? 'checked' }}>
+                                </td>
+                                <td>
+                                    {% if not item.is_used %}
+                                        <input type="checkbox" name="uninstall[]" value="{{ item.main_version }}" {{ item.is_uninstall ? 'checked' }}>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% if item.has_errors %}
+                                <tr>
+                                    <td colspan="42">
+                                        {{ item.errors }}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="42" class="has-text-grey-light">
+                                    {{ _interpreters|length }} {{ items_total }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            {% endif %}
+
+            {{ forms.label_wrapped({
+                'label': available_interpreters,
+                'help': available_interpreters_help
+            }) }}
+
+            <input type="hidden" name="scheduled_installs" value="{{ _scheduled_installs }}">
+            <input type="hidden" name="ajax_finished" value="0">
+
+            <div id="app-interpreter-not-available" class="has-text-centered has-text-grey" style="display: none">
+                - {{ no_items_available }} -
+            </div>
+
+            <div id="app-interpreter-error" class="has-text-centered" style="display: none">
+                <span class="has-text-danger has-text-weight-bold">
+                    {{ an_error_occurred }}
+                </span>
+                <br>
+                <span id="app-interpreter-error-message"></span>
+            </div>
+
+            <div class="has-text-centered has-margin-y-medium">
+                {{ forms.button({
+                    'label': refresh,
+                    'style': 'primary',
+                    'icon': 'fas fa-sync-alt',
+                    'id': 'app-load-interpreters',
+                    'type': 'button'
+                }) }}
+            </div>
+
+
+            <div id="app-interpreter-table" style="display: none">
+                {% include 'includes/scroll_table_container_buttons.twig' %}
+                <div class="table-container">
+                    <table class="table is-fullwidth is-hoverable is-striped has-valigned-cells">
+                        <thead>
+                            <tr>
+                                <th class="is-narrow">
+                                    S
+                                </th>
+                                <th class="is-narrow">
+                                    {{ version }}
+                                </th>
+                                <th>
+                                    <!-- eol -->
+                                </th>
+                                <th class="is-narrow">
+                                    {{ install }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="app-interpreter-tbody">
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="42" class="has-text-grey-light">
+                                    <span id="app-interpreter-count"></span> {{ items_total }}
+                                </td>
+                            <tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+{#######################################################################################################################
+    RAM drive
+#######################################################################################################################}
+
+        {% if _configure == 'ram_drive' %}
+            {{ forms.checkbox_wrapped({
+                'label': ram_drive_directories,
+                'help': ram_drive_directories_help,
+                'options': [
+                    {
+                        'label': '/tmp',
+                        'name': 'is_tmp',
+                        'value': '1',
+                        'is_checked': _is_tmp
+                    },
+                    {
+                        'label': '/var/tmp',
+                        'name': 'is_var_tmp',
+                        'value': '1',
+                        'is_checked': _is_var_tmp
+                    },
+                ]
+            }) }}
+
+            <div id="app-show-with-enabled" style="display: none">
+                {{ forms.checkbox_wrapped({
+                    'label': prevent_script_execution,
+                    'help': prevent_script_execution_help,
+                    'options': {
+                        'label': enabled,
+                        'name': 'is_noexec',
+                        'value': '1',
+                        'is_checked': _is_noexec
+                    },
+                }) }}
+
+                {{ forms.input_wrapped({
+                    'label': ram_drive_size,
+                    'name': 'size',
+                    'value': _size,
+                    'type': 'number',
+                    'min': 0,
+                    'is_required': true,
+                    'addons': {
+                        'right': {
+                            'type': 'select',
+                            'select': {
+                                'name': 'unit',
+                                'options': _units,
+                                'selected': _units_selected
+                            }
+                        }
+                    }
+                }) }}
+            </div>
+        {% endif %}
+
+{#######################################################################################################################
+    Webserver
+#######################################################################################################################}
+
+        {% if _configure == 'webserver' %}
+            {{ forms.label_wrapped({
+                'label': web_server_ports,
+                'help': web_server_ports_help
+            }) }}
+
+            {{ forms.input_wrapped({
+                'label': http_port,
+                'help': http_port_help,
+                'name': 'http_port',
+                'type': 'number',
+                'max': 65535,
+                'value': _http_port,
+                'is_required': true,
+            }) }}
+
+           {{ forms.input_wrapped({
+                'label': https_port,
+                'help': https_port_help,
+                'name': 'https_port',
+                'type': 'number',
+                'max': 65535,
+                'value': _https_port,
+                'is_required': true,
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Email server
+#######################################################################################################################}
+
+        {% if _configure == 'email_server' %}
+            {{ forms.input_wrapped({
+                'label': max_message_size,
+                'name': 'max_message_size',
+                'type': 'number',
+                'min': 0,
+                'value': _max_message_size,
+                'is_required': true,
+                'addons': {
+                    'left': {
+                        'type': 'select',
+                        'select': {
+                            'name': 'multiplier',
+                            'options': _multiplier_options,
+                            'selected': _multiplier_selected
+                        }
+                    }
+                }
+            }) }}
+
+            {{ forms.input_wrapped({
+                'label': imap_login_process_limit,
+                'help': imap_login_process_limit_help,
+                'name': 'imap_login_process_limit',
+                'type': 'number',
+                'min': 0,
+                'value': _imap_login_process_limit,
+                'is_required': true,
+            }) }}
+
+            {{ forms.input_wrapped({
+                'label': max_userip_connections,
+                'help': max_userip_connections_help,
+                'name': 'max_userip_connections',
+                'type': 'number',
+                'min': 0,
+                'value': _max_userip_connections,
+                'is_required': true,
+            }) }}
+
+            {{ forms.checkbox_wrapped({
+                'label': email_virus_checks,
+                'help': email_virus_checks_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'enable_virus_checks',
+                    'value': '1',
+                    'is_checked': _enable_virus_checks
+                }
+            }) }}
+
+            {{ forms.checkbox_wrapped({
+                'label': train_spam_filters,
+                'help': train_spam_filters_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'enable_train_spam_filters',
+                    'value': '1',
+                    'is_checked': _enable_train_spam_filters
+                }
+            }) }}
+
+            {{ forms.textarea_wrapped({
+                'label': dns_blacklists,
+                'help': dns_blacklists_help,
+                'name': 'dns_blacklists',
+                'value': _dns_blacklists,
+                'rows': 3
+            }) }}
+
+            {{ forms.textarea_wrapped({
+                'label': dns_whitelists,
+                'help': dns_whitelists_help,
+                'name': 'dns_whitelists',
+                'value': _dns_whitelists,
+                'rows': 3
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Database
+#######################################################################################################################}
+
+        {% if _configure == 'database' %}
+            {{ forms.checkbox_wrapped({
+                'label': database_remote_access,
+                'help': database_remote_access_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_database_remote_access',
+                    'value': '1',
+                    'is_checked': _is_database_remote_access
+                }
+            }) }}
+
+            {{ forms.radio_wrapped({
+                'label': database_names,
+                'help': database_names_help,
+                'options': [
+                    {
+                        'label': database_auto_names,
+                        'help': database_auto_names_help,
+                        'name': 'naming_scheme',
+                        'value': 'auto',
+                        'is_checked': _naming_scheme == 'auto'
+                    },
+                    {
+                        'label': database_restricted_names,
+                        'help': database_restricted_names_help,
+                        'name': 'naming_scheme',
+                        'value': 'limited',
+                        'is_checked': _naming_scheme == 'limited'
+                    },
+                    {
+                        'label': database_free_names,
+                        'help': database_free_names_help,
+                        'name': 'naming_scheme',
+                        'value': 'custom',
+                        'is_checked': _naming_scheme == 'custom'
+                    },
+                ]
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    FTP
+#######################################################################################################################}
+
+        {% if _configure == 'ftp' %}
+            {{ forms.checkbox_wrapped({
+                'label': ftp_custom_names,
+                'help': ftp_custom_names_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_ftp_custom_names',
+                    'value': '1',
+                    'is_checked': _is_ftp_custom_names
+                }
+            }) }}
+
+            {{ forms.checkbox_wrapped({
+                'label': ftp_tls_required,
+                'help': ftp_tls_required_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_tls_required',
+                    'value': '1',
+                    'is_checked': _is_tls_required
+                }
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    System time
+#######################################################################################################################}
+
+        {% if _configure == 'system_time' %}
+            {{ forms.select_wrapped({
+                'label': time_zone,
+                'help': time_zone_help,
+                'name': 'time_zone',
+                'options': _time_zones,
+                'selected': _time_zones_selected
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Reboot
+#######################################################################################################################}
+
+        {% if _configure == 'reboot' %}
+            {{ forms.checkbox_wrapped({
+                'label': perform_reboot,
+                'help': confirm_reboot,
+                'options': {
+                    'label': confirmation,
+                    'name': 'is_reboot',
+                    'value': '1'
+                }
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    SSL/TLS certificate
+#######################################################################################################################}
+
+        {% if _configure == 'tls_certificates' %}
+
+            {{ forms.radio_wrapped({
+                'label': tls_notifications,
+                'help': tls_notifications_help,
+                'options': [
+                    {
+                        'label': admin_accounts,
+                        'name': 'tls_notification',
+                        'value': 'admins',
+                        'is_checked': _tls_notification == 'admins',
+                    },
+                    {
+                        'label': owners,
+                        'name': 'tls_notification',
+                        'value': 'owners',
+                        'is_checked': _tls_notification == 'owners',
+                    },
+                    {
+                        'label': alternate_email,
+                        'name': 'tls_notification',
+                        'value': 'email',
+                        'is_checked': _tls_notification == 'email',
+                    },
+                ]
+            }) }}
+
+            <div class="app-show-with-email" style="display: none">
+                {{ forms.input_wrapped({
+                    'help': notification_email,
+                    'type': 'email',
+                    'name': 'tls_notification_email',
+                    'value': _tls_notification_email,
+                }) }}
+            </div>
+
+            {{ forms.select_wrapped({
+                'label': certificate_expired,
+                'help': certificate_expired_help,
+                'name': 'notify_in_advance',
+                'options': _notify_in_advance,
+                'selected': _notify_in_advance_selected,
+            }) }}
+
+            <div class="has-margin-large">
+                <hr class="has-background-grey-light">
+            </div>
+
+            {{ forms.label_wrapped({
+                'label': lets_encrypt,
+            }) }}
+            {{ forms.select_wrapped({
+                'label': environment,
+                'help': environment_help,
+                'name': 'environment',
+                'options': _environments,
+                'selected': _environments_selected,
+            }) }}
+            {{ forms.select_wrapped({
+                'label': country,
+                'help': country_help,
+                'name': 'country',
+                'options': _countries,
+                'selected': _countries_selected,
+            }) }}
+            {{ forms.input_wrapped({
+                'label': state,
+                'help': state_help,
+                'name': 'state',
+                'value': _state,
+                'is_required': true
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Password
+#######################################################################################################################}
+
+        {% if _configure == 'password' %}
+            {{ forms.input_wrapped({
+                'label': password_minimum_length,
+                'name': 'password_minimum_length',
+                'value': _password_minimum_length,
+                'type': 'number',
+                'min': 1
+            }) }}
+
+            {{ forms.checkbox_wrapped({
+                'label': password_complexity,
+                'help': password_complexity_help,
+                'options': [
+                    {
+                        'label': complexity_letters,
+                        'name': 'is_letter',
+                        'value': '1',
+                        'is_checked': _is_letter
+                    },
+                    {
+                        'label': complexity_lowercase,
+                        'name': 'is_lowercase',
+                        'value': '1',
+                        'is_checked': _is_lowercase
+                    },
+                    {
+                        'label': complexity_uppercase,
+                        'name': 'is_uppercase',
+                        'value': '1',
+                        'is_checked': _is_uppercase
+                    },
+                    {
+                        'label': complexity_digits,
+                        'name': 'is_digit',
+                        'value': '1',
+                        'is_checked': _is_digit
+                    },
+                    {
+                        'label': complexity_special,
+                        'name': 'is_special',
+                        'value': '1',
+                        'is_checked': _is_special
+                    },
+                ]
+            }) }}
+
+            {{ forms.checkbox_wrapped({
+                'label': additional_password_checks,
+                'options': [
+                    {
+                        'label': complexity_non_common,
+                        'name': 'is_non_common',
+                        'value': '1',
+                        'is_checked': _is_non_common
+                    },
+                    {
+                        'label': complexity_have_i_been_pwned,
+                        'help': complexity_have_i_been_pwned_help,
+                        'name': 'is_have_i_been_pwned',
+                        'value': '1',
+                        'is_checked': _is_have_i_been_pwned
+                    },
+                ]
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Login sessions
+#######################################################################################################################}
+
+        {% if _configure == 'login_sessions' %}
+            {{ forms.input_wrapped({
+                'label': max_throttle_delay,
+                'help': max_throttle_delay_help,
+                'name': 'max_throttle_delay',
+                'value': _max_throttle_delay,
+                'type': 'number',
+                'min': 0,
+                'addons': {
+                    'left': {
+                        'type': 'select',
+                        'select': {
+                            'name': 'max_throttle_delay_multiplier',
+                            'options': _time_intervals_multipliers,
+                            'selected': _max_throttle_delay_multiplier_selected
+                        }
+                    },
+                }
+            }) }}
+
+            {{ forms.input_wrapped({
+                'label': session_idle_time,
+                'help': session_idle_time_help,
+                'name': 'session_idle_time',
+                'value': _session_idle_time,
+                'type': 'number',
+                'min': 1,
+                'addons': {
+                    'left': {
+                        'type': 'select',
+                        'select': {
+                            'name': 'session_idle_time_multiplier',
+                            'options': _time_intervals_multipliers,
+                            'selected': _session_idle_time_multiplier_selected
+                        }
+                    },
+                }
+            }) }}
+
+            {{ forms.textarea_wrapped({
+                'label': restrict_administrative_access,
+                'help': restrict_administrative_access_help,
+                'name': 'administrative_access',
+                'value': _administrative_access,
+                'rows': 3,
+                'is_auto_resize': true,
+            }) }}
+
+            {{ forms.radio_wrapped({
+                'help': list_acts_as,
+                'options': [
+                    {
+                        'label': access_blacklist,
+                        'name': 'administrative_access_behavior',
+                        'value': 'blacklist',
+                        'is_checked': _administrative_access_behavior == 'blacklist',
+                    },
+                    {
+                        'label': access_whitelist,
+                        'name': 'administrative_access_behavior',
+                        'value': 'whitelist',
+                        'is_checked': _administrative_access_behavior == 'whitelist',
+                    },
+                ]
+            }) }}
+
+            {{ forms.label_wrapped({
+                'label': important_note,
+                'help': restricted_access_note_help
+            }) }}
+
+            <code>{{ _cli_toolbox_command }}</code>
+        {% endif %}
+
+{#######################################################################################################################
+    TLS version & TLS ciphers
+#######################################################################################################################}
+
+        {% if _configure == 'tls_version_and_ciphers' %}
+            {{ forms.radio_wrapped({
+                'label': configuration_type,
+                'options': [
+                    {
+                        'label': default_configuration,
+                        'help': default_configuration_help,
+                        'name': 'use_custom',
+                        'value': '0',
+                        'is_checked': not _use_custom,
+                    },
+                    {
+                        'label': custom_configuration,
+                        'name': 'use_custom',
+                        'value': '1',
+                        'is_checked': _use_custom,
+                    },
+                ]
+            }) }}
+
+            {% for key in ['default', 'custom'] %}
+                <div class="app-show-with-{{ key }}" style="display:none">
+                    {{ forms.radio_wrapped({
+                        'label': minimal_tls_version,
+                        'options': [
+                            {
+                                'label': 'TLS 1.3',
+                                'help': tls_1_3_help,
+                                'name': key == 'default' ? 'unused' : 'min_protocol',
+                                'value': 'TLSv1.3',
+                                'is_checked': (key == 'default' ? _default_min_protocol : _min_protocol) == 'TLSv1.3',
+                                'is_disabled': key == 'default',
+                            },
+                            {
+                                'label': 'TLS 1.2',
+                                'help': tls_1_2_help,
+                                'name': key == 'default' ? 'unused' : 'min_protocol',
+                                'value': 'TLSv1.2',
+                                'is_checked': (key == 'default' ? _default_min_protocol : _min_protocol) == 'TLSv1.2',
+                                'is_disabled': key == 'default',
+                            },
+                            {
+                                'label': 'TLS 1.1',
+                                'help': tls_1_1_help,
+                                'name': key == 'default' ? 'unused' : 'min_protocol',
+                                'value': 'TLSv1.1',
+                                'is_checked': (key == 'default' ? _default_min_protocol : _min_protocol) == 'TLSv1.1',
+                                'is_disabled': key == 'default',
+                            },
+                            {
+                                'label': 'TLS 1',
+                                'help': tls_1_help,
+                                'name': key == 'default' ? 'unused' : 'min_protocol',
+                                'value': 'TLSv1',
+                                'is_checked': (key == 'default' ? _default_min_protocol : _min_protocol) == 'TLSv1',
+                                'is_disabled': key == 'default',
+                            },
+                        ]
+                    }) }}
+
+                    {{ forms.textarea_wrapped({
+                        'label': tls_ciphers,
+                        'name': key == 'default' ? 'unused' : 'ciphers',
+                        'value': key == 'default' ? _default_ciphers : _ciphers,
+                        'rows': 4,
+                        'is_auto_resize': true,
+                        'is_disabled': key == 'default',
+                    }) }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+{#######################################################################################################################
+    File manager
+#######################################################################################################################}
+
+        {% if _configure == 'file_manager' %}
+            {{ forms.checkbox_wrapped({
+                'label': file_manager_enabled,
+                'help': file_manager_help,
+                'options': {
+                    'label': yes,
+                    'name': 'is_enabled',
+                    'value': '1',
+                    'is_checked': _is_enabled
+                }
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Applications
+#######################################################################################################################}
+
+        {% if _configure == 'applications' %}
+
+            {% if _applications is empty %}
+                <p class="has-text-centered has-text-grey">
+                    {{ loading_application_list }}
+                </p>
+
+                <div class="has-padding-y-large">
+                    <div id="app-loading-animation" class="has-text-centered is-loading">
+                        <div class="has-margin-large has-padding-small">
+                            <!--
+                                Only to have some content, so that loading animation can be displayed.
+                                Will be overriden, when ajax call was finished.
+                            -->
+                        </div>
+                    </div>
+                    <div id="app-loading-error" class="has-text-centered" style="display: none">
+                        <p class="has-text-danger has-text-weight-bold">
+                            {{ an_error_occurred }}
+                        </p>
+                        <p id="app-loading-error-message" class="has-margin-y-small is-italic"></p>
+                        <p>
+                            {{ try_again_later }}
+                        </p>
+                    </div>
+                    <div id="app-loading-success" class="has-text-centered has-text-grey" style="display: none">
+                        {{ auto_redirect|raw }}
+                    </div>
+                </div>
+            {% else %}
+                {{ forms.radio_wrapped({
+                    'label': application_filter,
+                    'help': application_filter_help,
+                    'options': [
+                        {
+                            'label': allow_all_apps,
+                            'name': 'is_filter_enabled',
+                            'value': '0',
+                            'is_checked': not _is_filter_enabled,
+                        },
+                        {
+                            'label': allow_only_selected_apps,
+                            'name': 'is_filter_enabled',
+                            'value': '1',
+                            'is_checked': _is_filter_enabled,
+                        },
+                    ]
+                }) }}
+
+                <div id="app-application-container" class="columns is-multiline" style="display: none;">
+                    {% for _category in _applications %}
+                        <div class="column is-6-tablet is-6-desktop is-6-widescreen is-4-fullhd">
+                            {% include 'includes/card_start_stacked.twig' with { '_label': _category.label, '_has_equal_height': true, '_additional_classes': 'has-background-white' } %}
+                                {% for _item in _category.items %}
+                                    {{ forms.checkbox({
+                                        'name': 'app_ids[]',
+                                        'label': _item.name,
+                                        'value': _item.id,
+                                        'is_checked': _item.selected
+                                    }) }}
+                                {% endfor %}
+                            {% include 'includes/card_end_stacked.twig' %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endif %}
+
+{#######################################################################################################################
+    AV scanner
+#######################################################################################################################}
+
+        {% if _configure == 'av_scanner' %}
+            {{ forms.checkbox_wrapped({
+                'label': is_enabled,
+                'options': {
+                    'label': yes,
+                    'name': 'is_enabled',
+                    'value': '1',
+                    'is_checked': _is_enabled
+                }
+            }) }}
+
+            {{ forms.select_wrapped({
+                'label': infection_treatment,
+                'name': 'infection_treatment',
+                'options': _infection_treatments,
+                'selected': _infection_treatments_selected,
+            }) }}
+
+            {{ forms.input_wrapped({
+                'label': notification,
+                'help': av_notification_help,
+                'name': 'notification_email',
+                'type': 'email',
+                'value': _notification_email,
+            }) }}
+
+            {{ forms.checkbox_wrapped({
+                'help': av_notification_verbose,
+                'options': {
+                    'label': yes,
+                    'name': 'is_notification_verbose',
+                    'value': '1',
+                    'is_checked': _is_notification_verbose
+                }
+            }) }}
+
+            {{ forms.textarea_wrapped({
+                'label': scan_locations,
+                'help': scan_locations_help,
+                'name': 'scan_locations',
+                'value': _scan_locations,
+                'rows': 4,
+                'is_auto_resize': true,
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Webmail
+#######################################################################################################################}
+
+        {% if _configure == 'webmail' %}
+            {{ forms.checkbox_wrapped({
+                'label': webmail_is_enabled,
+                'options': {
+                    'label': yes,
+                    'name': 'is_enabled',
+                    'value': '1',
+                    'is_checked': _is_enabled
+                }
+            }) }}
+
+            {{ forms.select_wrapped({
+                'label': webmail_client,
+                'name': 'webmail_client',
+                'options': _webmail_clients,
+                'selected': _webmail_clients_selected,
+            }) }}
+
+            {{ forms.input_wrapped({
+                'label': access_url,
+                'help': access_url_webmail_help,
+                'name': 'access_url',
+                'type': 'url',
+                'value': _access_url,
+                'is_required': true,
+            }) }}
+
+            {{ forms.radio_wrapped({
+                'label': webmail_subdomain_behavior,
+                'help': webmail_subdomain_behavior_help,
+                'options': [
+                    {
+                        'label': behavior_redirect,
+                        'help': behavior_redirect_help,
+                        'name': 'webmail_subdomain',
+                        'value': 'redirect',
+                        'is_checked': _webmail_subdomain == 'redirect'
+                    },
+                    {
+                        'label': behavior_stay,
+                        'help': behavior_stay_help,
+                        'name': 'webmail_subdomain',
+                        'value': 'stay',
+                        'is_checked': _webmail_subdomain == 'stay'
+                    },
+                    {
+                        'label': behavior_stay_insecure,
+                        'help': behavior_stay_insecure_help,
+                        'name': 'webmail_subdomain',
+                        'value': 'stay_insecure',
+                        'is_checked': _webmail_subdomain == 'stay_insecure'
+                    },
+                ]
+            }) }}
+
+            {{ forms.input_wrapped({
+                'label': product_name,
+                'name': 'product_name',
+                'value': _product_name,
+            }) }}
+
+            <div class="app-show-with-roundcube" style="display:none">
+                {{ forms.input_wrapped({
+                    'label': support_url,
+                    'name': 'support_url',
+                    'value': _support_url,
+                }) }}
+
+                {{ forms.select_wrapped({
+                    'label': skin,
+                    'name': 'skin',
+                    'options': _skins,
+                    'selected': _skins_selected,
+                }) }}
+
+                {{ forms.input_wrapped({
+                    'label': plugins,
+                    'help': plugins_help,
+                    'name': 'plugins',
+                    'value': _plugins,
+                }) }}
+            </div>
+        {% endif %}
+
+{#######################################################################################################################
+    Database administration
+#######################################################################################################################}
+
+        {% if _configure == 'database_administration' %}
+            {{ forms.checkbox_wrapped({
+                'label': db_administration_is_enabled,
+                'options': {
+                    'label': yes,
+                    'name': 'is_enabled',
+                    'value': '1',
+                    'is_checked': _is_enabled
+                }
+            }) }}
+
+            {{ forms.select_wrapped({
+                'label': db_administration_client,
+                'name': 'db_administration_client',
+                'options': _db_administration_clients,
+                'selected': _db_administration_clients_selected,
+            }) }}
+
+            {{ forms.input_wrapped({
+                'label': access_url,
+                'help': access_url_db_administration_help,
+                'name': 'access_url',
+                'value': _access_url,
+                'type': 'url',
+                'is_required': true,
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Backup
+#######################################################################################################################}
+
+        {% if _configure == 'backup' %}
+            {{ forms.checkbox_wrapped({
+                'label': enable_local_repo,
+                'help': enable_local_repo_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_local_repo_enabled',
+                    'value': '1',
+                    'is_checked': _is_local_repo_enabled
+                }
+            }) }}
+
+            <div class="app-show-with-local-repo" style="display: none">
+                {{ forms.input_wrapped({
+                    'label': max_files_local_repo,
+                    'help': max_files_local_repo_help,
+                    'name': 'max_files_local_repo',
+                    'type': 'number',
+                    'min': 0,
+                    'value': _max_files_local_repo,
+                }) }}
+            </div>
+
+            {{ forms.select_wrapped({
+                'label': compression_rate,
+                'help': compression_rate_help,
+                'name': 'compression_rate',
+                'options': _compression_rates,
+                'selected': _compression_rates_selected,
+            }) }}
+
+            {{ forms.checkbox_wrapped({
+                'label': multithreading,
+                'help': multithreading_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_multithreading',
+                    'value': '1',
+                    'is_checked': _is_multithreading
+                }
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Tmp cleanup
+#######################################################################################################################}
+
+        {% if _configure == 'tmp_cleanup' %}
+            {{ forms.input_wrapped({
+                'label': tmp_cleanup_sessions,
+                'help': tmp_cleanup_empty,
+                'name': 'cleanup_sessions',
+                'value': _cleanup_sessions,
+                'type': 'number',
+                'min': 0,
+                'addons': {
+                    'left': {
+                        'type': 'select',
+                        'select': {
+                            'name': 'cleanup_sessions_multiplier',
+                            'options': _interval_units,
+                            'selected': _cleanup_sessions_multiplier
+                        }
+                    },
+                }
+            }) }}
+
+            {{ forms.input_wrapped({
+                'label': tmp_cleanup_files,
+                'help': tmp_cleanup_empty,
+                'name': 'cleanup_files',
+                'value': _cleanup_files,
+                'type': 'number',
+                'min': 0,
+                'addons': {
+                    'left': {
+                        'type': 'select',
+                        'select': {
+                            'name': 'cleanup_files_multiplier',
+                            'options': _interval_units,
+                            'selected': _cleanup_files_multiplier
+                        }
+                    },
+                }
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    AWStats
+#######################################################################################################################}
+
+        {% if _configure == 'awstats' %}
+            {{ forms.checkbox_wrapped({
+                'label': awstats,
+                'help': awstats_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_enabled',
+                    'value': '1',
+                    'is_checked': _is_enabled
+                }
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    System domain scheme
+#######################################################################################################################}
+
+        {% if _configure == 'system_domain_scheme' %}
+            {{ forms.input_wrapped({
+                'label': system_domain_scheme,
+                'help': system_domain_scheme_help,
+                'name': 'system_domain_scheme',
+                'value': _system_domain_scheme,
+                'is_required': true,
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Theme
+#######################################################################################################################}
+
+        {% if _configure == 'theme' %}
+            {{ forms.label_wrapped({
+                'label': theme,
+                'help': theme_help,
+            }) }}
+
+            {% for item in _themes %}
+                {{ forms.radio_wrapped({
+                    'options': [
+                        {
+                            'label': '<b>' ~ item.name ~ '</b>',
+                            'name': 'theme',
+                            'value': item.id,
+                            'is_checked': item.id == _current_theme,
+                        },
+                    ]
+                }) }}
+                <div class="columns">
+                    <div class="column has-text-centered">
+                        {% if item.screenshot %}
+                            <img class="image has-frame" src="{{ item.screenshot }}">
+                        {% else %}
+                            <div>
+                            <i class="far fa-image fa-4x has-text-grey-lighter"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="column">
+                        {% if item.description %}
+                            <div class="has-margin-bottom-small">
+                                <p class="has-text-weight-bold">{{ description }}</p>
+                                <p class="has-margin-left-medium">{{ item.description }}<p>
+                            </div>
+                        {% endif %}
+                        {% if item.version %}
+                            <div class="has-margin-bottom-small">
+                                <p class="has-text-weight-bold">{{ version }}</p>
+                                <p class="has-margin-left-medium">{{ item.version }}</p>
+                            </div>
+                        {% endif %}
+                        {% if item.author %}
+                            <div class="has-margin-bottom-small">
+                                <p class="has-text-weight-bold">{{ author }}</p>
+                                <p class="has-margin-left-medium">{{ item.author }}<p>
+                            </div>
+                        {% endif %}
+                        {% if item.website %}
+                            <div class="has-margin-bottom-small">
+                                <p class="has-text-weight-bold">{{ website }}</p>
+                                <p class="has-margin-left-medium"><a href="{{ item.website }}" target="_blank" rel="nofollow noopener noreferrer">{{ item.website }}</a></p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if not loop.last %}
+                    <div class="has-margin-large">
+                        <hr class="has-background-grey-lighter">
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+{#######################################################################################################################
+    Languages
+#######################################################################################################################}
+
+        {% if _configure == 'languages' %}
+            {% include 'includes/scroll_table_container_buttons.twig' %}
+            <div class="table-container">
+                <table class="table is-fullwidth is-hoverable is-striped has-valigned-cells">
+                    <thead>
+                        <tr>
+                            <th colspan="2">
+                                {{ language }}
+                            </th>
+                            <th>
+                                {{ enabled }}
+                            </th>
+                            <th>
+                                {{ default }}
+                            </th>
+                            <th>
+                                {{ used }}
+                            </th>
+                            <th>
+                                {{ translator }}
+                            </th>
+                    </thead>
+                    <tbody>
+                        {% for item in _all_languages %}
+                            <tr>
+                                <td class="has-no-wrap">
+                                    {{ item.label }}
+                                </td>
+                                <td class="is-narrow">
+                                    <div class="app-tooltip-mandatory" data-tippy-content="{{ translation_coverage|format(item.translated_share) }}">
+                                        <span class="tag {{ item.translated_share > 90 ? 'is-success' : (item.translated_share > 70 ? 'is-warning' : 'is-danger') }}">
+                                            {{ item.translated_share }} %
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if item.code != 'en' %}
+                                        <input type="checkbox" name="enabled[]" value="{{ item.code }}" {{ item.is_enabled ? 'checked' }}>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <input type="radio" name="default" value="{{ item.code }}" {{ item.is_default ? 'checked' }}>
+                                </td>
+                                <td>
+                                    {{ item.used }}
+                                </td>
+                                <td>
+                                    {% if item.is_official %}
+                                        <span class="has-text-grey-light">
+                                            {{ official_translation }}
+                                        </span>
+                                    {% elseif item.translator_info %}
+                                        <ul>
+                                            {% for translator in item.translator_info.translators %}
+                                                <li>
+                                                    {% if translator.url %}
+                                                        <a href="{{ translator.url }}" rel="nofollow noopener noreferrer" target="_blank">
+                                                            {{ translator.name }}
+                                                        </a>
+                                                    {% else %}
+                                                        {{ translator.name }}
+                                                    {% endif %}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="42" class="has-text-grey-light">
+                            </td>
+                        <tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <p class="has-text-centered has-text-grey">
+                {{ language_help }}
+            </p>
+        {% endif %}
+
+{#######################################################################################################################
+    Service status (Dashboard)
+#######################################################################################################################}
+
+        {% if _configure == 'service_status' %}
+            <input type="hidden" name="service_config" value="">
+
+            <p class="has-margin-bottom-medium">
+                {{ service_status_help }}
+            </p>
+
+            <div class="has-text-centered has-margin-bottom-large">
+                {{ forms.button({
+                    'label': add_service,
+                    'type': 'button',
+                    'id': 'app-btn-add-service'
+                }) }}
+            </div>
+
+            <div id="app-service-container">
+                <!-- added by Javascript -->
+            </div>
+        {% endif %}
+
+{#######################################################################################################################
+    License management
+#######################################################################################################################}
+
+        {% if _configure == 'license_management' %}
+
+            <p>
+                {{ license_help|raw }}
+            </p>
+
+            <div class="has-text-centered has-margin-y-xlarge">
+                {{ activated_product }}
+                <h1 class="is-4 title">
+                    {{ _is_keyhelp_pro ? keyhelp_professional : keyhelp_standard }}
+                </h1>
+            </div>
+
+            {% if _has_license %}
+                {% include 'includes/card_start_buttons.twig' with {
+                    '_label': keyhelp_professional_license,
+                    '_icon': 'fas fa-medal',
+                    '_edit_modal': 'app-modal-license-key',
+                    '_delete_modal': 'app-modal-license-key-delete'
+                } %}
+
+                <div class="table-container">
+                    <table class="table is-fullwidth is-hoverable is-striped has-valigned-cells">
+                        <tr>
+                            <th>{{ license_key }}</th>
+                            <td>{{ _license_key }}</td>
+                        </tr>
+                        <tr>
+                            <th>{{ validity }}</th>
+                            <td class="has-text-weight-bold">
+                                {% if _is_valid_or_grace_period %}
+                                    <span class="has-text-success">{{ valid }}</span>
+                                    {% if _is_grace_period %}
+                                        {% include 'includes/icon.twig' with {
+                                            '_type': 'attention',
+                                            '_tooltip': grace_period_help,
+                                            '_color': 'has-text-warning'
+                                        } %}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="has-text-danger">{{ invalid }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ expire_date }}</th>
+                            <td>
+                                {% if _expire_date %}
+                                    {{ _expire_date }}
+
+                                    {% if _is_expired %}
+                                        {% include 'includes/icon.twig' with {
+                                            '_type': 'attention',
+                                            '_tooltip': expired
+                                        } %}
+                                    {% elseif _is_expiring_soon %}
+                                        {% include 'includes/icon.twig' with {
+                                            '_type': 'attention',
+                                            '_tooltip': expires_soon,
+                                            '_color': 'has-text-warning'
+                                        } %}
+                                    {% endif %}
+                                {% else %}
+                                    &#x2014;
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ registered_device_data }}</th>
+                            <td>
+                                <div>
+                                    {{ ip_address }}: {{ _device_ip_address }}
+                                    {% if not _has_valid_ip_address %}
+                                        {% include 'includes/icon.twig' with {
+                                            '_type': 'attention',
+                                            '_tooltip': not_match_server_data
+                                        } %}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {{ mac_address }}: {{ _device_mac_address }}
+                                    {% if not _has_valid_mac_address %}
+                                        {% include 'includes/icon.twig' with {
+                                            '_type': 'attention',
+                                            '_tooltip': not_match_server_data
+                                        } %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{ last_update }}</th>
+                            <td>
+                                {{ _last_update }}
+                                {% if not _has_valid_last_update %}
+                                    {% include 'includes/icon.twig' with {
+                                        '_type': 'attention',
+                                        '_tooltip': license_requires_update
+                                    } %}
+                                {% elseif _is_last_update_expiring_soon %}
+                                    {% include 'includes/icon.twig' with {
+                                        '_type': 'attention',
+                                        '_tooltip': license_requires_update_warn,
+                                        '_color': 'has-text-warning'
+                                    } %}
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
+
+                {% include 'includes/card_end_buttons.twig' %}
+
+            {% elseif not _is_keyweb_server %}
+                <div class="has-text-centered has-margin-bottom-xlarge">
+                    {{ forms.button({
+                        'label': add_license_key,
+                        'style': 'primary',
+                        'type': 'button',
+                        'modal': 'app-modal-license-key'
+                    }) }}
+                </div>
+            {% endif %}
+
+            {###########################################################################################################
+                Modals
+            ###########################################################################################################}
+
+                <div id="app-modal-license-key" class="modal">
+                    <div class="modal-background"></div>
+                    <div class="modal-card">
+                        <header class="modal-card-head">
+                            <p class="modal-card-title">
+                                {{ _has_license ? edit_license_key : add_license_key }}
+                            </p>
+                            <button class="delete app-modal-close" type="button"></button>
+                        </header>
+                        <div class="modal-card-body">
+                            {{ forms.input_wrapped({
+                                'label': license_key,
+                                'name': 'license_key',
+                                'type': 'text',
+                                'placeholder': 'XXXXX-XXXXX-XXXXX-XXXXX-XXXXX',
+                                'value': _license_key,
+                                'is_required': true,
+                            }) }}
+                        </div>
+                        <footer class="modal-card-foot">
+                            {{ forms.button({'label': save, 'style': 'primary', 'class': 'app-button-with-loading-animation', }) }}
+                            {{ forms.button({'label': cancel, 'class': 'app-modal-close', 'type': 'button' }) }}
+                        </footer>
+                    </div>
+                </div>
+
+                <div id="app-modal-license-key-delete" class="modal">
+                    <div class="modal-background"></div>
+                    <div class="modal-card">
+                        <header class="modal-card-head">
+                            <p class="modal-card-title">{{ delete_license }}</p>
+                            <button class="delete app-modal-close" type="button"></button>
+                        </header>
+                        <div class="modal-card-body">
+                            {{ are_you_sure_delete_single }}
+                        </div>
+                        <footer class="modal-card-foot">
+                            {{ forms.button({'label': yes, 'style': 'primary', 'url': '?page=' ~ _app.page ~ '&configure=' ~ _configure ~ '&delete_license=1' }) }}
+                            {{ forms.button({'label': cancel, 'class': 'app-modal-close', 'type': 'button' }) }}
+                        </footer>
+                    </div>
+                </div>
+
+        {% endif %}
+
+{#######################################################################################################################
+    Support access
+#######################################################################################################################}
+
+        {% if _configure == 'support_access' %}
+            {{ forms.checkbox_wrapped({
+                'label': support_access,
+                'help': support_access_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_support_access_enabled',
+                    'value': '1',
+                    'is_checked': _is_support_access_enabled
+                }
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Data privacy
+#######################################################################################################################}
+
+        {% if _configure == 'data_privacy' %}
+            {{ forms.checkbox_wrapped({
+                'label': ip_anonymization,
+                'help': ip_anonymization_help,
+                'options': [
+                    {
+                        'label': anonymize_all,
+                        'help': anonymize_all_help,
+                        'name': 'is_anonymize_all',
+                        'value': '1',
+                        'is_checked': _is_anonymize_all
+                    },
+                    {
+                        'label': anonymize_panel,
+                        'name': 'is_anonymize_panel',
+                        'value': '1',
+                        'is_checked': _is_anonymize_panel
+                    }
+                ]
+            }) }}
+
+            {{ forms.checkbox_wrapped({
+                'label': anonymize_awstats,
+                'help': anonymize_awstats_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_anonymize_awstats',
+                    'value': '1',
+                    'is_checked': _is_anonymize_awstats
+                }
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Notifications
+#######################################################################################################################}
+
+        {% if _configure == 'notifications' %}
+            {{ forms.input_wrapped({
+                'label': notification_sender_email,
+                'help': notification_sender_email_help,
+                'name': 'notification_sender_email',
+                'value': _notification_sender_email,
+                'type': 'email',
+                'is_required': true,
+            }) }}
+
+            <div class="has-margin-large">
+                <hr class="has-background-grey-light">
+            </div>
+
+            {{ forms.input_wrapped({
+                'label': traffic_notification,
+                'help': traffic_notification_help,
+                'name': 'traffic_notification_email',
+                'value': _traffic_notification_email,
+                'type': 'email',
+            }) }}
+
+            <div class="has-margin-large">
+                <hr class="has-background-grey-light">
+            </div>
+
+            {{ forms.label_wrapped({
+                'label': tls_notifications,
+                'help': tls_notification_link
+            }) }}
+
+            <div class="has-margin-large">
+                <hr class="has-background-grey-light">
+            </div>
+
+            {{ forms.checkbox_wrapped({
+                'label': send_email_account_created,
+                'help': send_email_account_created_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_send_email_account_created',
+                    'value': '1',
+                    'is_checked': _is_send_email_account_created
+                }
+            }) }}
+
+            <div class="has-margin-large">
+                <hr class="has-background-grey-light">
+            </div>
+
+            {{ forms.label_wrapped({
+                'label': email_addresses_of_server_domain,
+                'help': email_addresses_of_server_domain_help,
+            }) }}
+
+            {{ forms.textarea_wrapped({
+                'help': available_recipients,
+                'name': 'server_domain_aliases',
+                'value': _server_domain_aliases,
+                'is_auto_resize': true
+            }) }}
+
+            {{ forms.input_wrapped({
+                'help': forward_to,
+                'name': 'server_domain_forwarding',
+                'value': _server_domain_forwarding,
+                'type': 'email',
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Subdomain catch-all
+#######################################################################################################################}
+
+        {% if _configure == 'subdomain_catch_all' %}
+            {{ forms.checkbox_wrapped({
+                'label': enable_subdomain_catch_all,
+                'help': enable_subdomain_catch_all_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_subdomain_catch_all_enabled',
+                    'value': '1',
+                    'is_checked': _is_subdomain_catch_all_enabled
+                }
+            }) }}
+            {{ forms.checkbox_wrapped({
+                'label': redirect_to_main_domain,
+                'help': redirect_to_main_domain_help,
+                'options': {
+                    'label': yes,
+                    'name': 'is_redirect_to_main_domain',
+                    'value': '1',
+                    'is_checked': _is_redirect_to_main_domain
+                }
+            }) }}
+        {% endif %}
+
+{#######################################################################################################################
+    Maintenance mode
+#######################################################################################################################}
+
+        {% if _configure == 'maintenance_mode' %}
+            {{ forms.checkbox_wrapped({
+                'label': maintenance_mode,
+                'help': maintenance_mode_help,
+                'options': {
+                    'label': enabled,
+                    'name': 'is_maintenance_mode_enabled',
+                    'value': '1',
+                    'is_checked': _is_maintenance_mode_enabled
+                }
+            }) }}
+            {{ forms.textarea_wrapped({
+                'label': maintenance_mode_excluded_ips,
+                'help': maintenance_mode_excluded_ips_help,
+                'name': 'maintenance_mode_excluded_ips',
+                'value': _maintenance_mode_excluded_ips,
+                'rows': 3,
+                'is_auto_resize': true,
+            }) }}
+
+            {{ forms.label_wrapped({
+                'label': important_note,
+                'help': maintenance_mode_note_help
+            }) }}
+
+            <code>{{ _cli_toolbox_command }}</code>
+        {% endif %}
+
+        {% if _has_only_back_button %}
+            {% include 'includes/cta.twig' with { '_back': { 'target': _app.page } } %}
+        {% else %}
+            {% include 'includes/cta.twig' with { '_back': { 'target': _app.page }, '_confirm': true } %}
+        {% endif %}
+    </form>
+
+    {% include 'includes/card_end.twig' %}
+
+{% endblock %}

@@ -1,0 +1,14 @@
+<p>
+    {{ _is_eol ? eol_warning|raw : eol_info|raw }}
+    <br>
+    {{ upgrade_recommended }}
+</p>
+<p class="has-margin-y-medium has-text-weight-bold">
+    {{ end_of_support_period }} {{ _eol_date }}
+    {% if not _is_eol %}({{ _days_left }}){% endif %}
+</p>
+<p>
+    {{ upgrade_intro|raw }}
+    <br>
+    {{ _hide_guide ? upgrade_ask_support|raw : upgrade_guide|raw }}
+</p>

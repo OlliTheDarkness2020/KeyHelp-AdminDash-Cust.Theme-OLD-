@@ -1,0 +1,170 @@
+{% extends 'base/intern.twig' %}
+
+
+
+{% block content %}
+    {% import "macros/macros.twig" as macros %}
+    {% import "macros/forms.twig" as forms %}
+
+    {# Button line #}
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                {{ forms.button({
+                    'label': clear_messages,
+                    'style': 'secondary',
+                    'modal': 'app-modal-reset-list'
+                }) }}
+            </div>
+        </div>
+    </div>
+
+    {# Viewing options #}
+    <div class="card has-margin-bottom-medium">
+        <div class="card-content">
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <strong>{{ viewing_options }}</strong>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        {% set _viewing_options_menu %}
+                            <form action="?page={{ _app.page }}&sid={{ _app.sid }}" method="post">
+                                <input type="hidden" name="update_view_options" value="1">
+
+                                <div class="has-text-left has-no-wrap has-padding-small">
+                                    {{ forms.checkbox_wrapped({
+                                        'options': [{
+                                            'label': info,
+                                            'name': 'show_info',
+                                            'value': '1',
+                                            'is_checked': _show_info
+                                        },{
+                                            'label': warning,
+                                            'name': 'show_warning',
+                                            'value': '1',
+                                            'is_checked': _show_warning
+                                        },{
+                                            'label': error,
+                                            'name': 'show_error',
+                                            'value': '1',
+                                            'is_checked': _show_error
+                                        }]
+                                    }) }}
+                                    <div class="has-text-centered">
+                                        {{ forms.button({
+                                            'label': save,
+                                            'style': 'primary',
+                                        }) }}
+                                    </div>
+                                </div>
+                            </form>
+                        {% endset %}
+
+                        <div class="app-tooltip-click" data-tippy-content="{{ _viewing_options_menu|escape('html') }}">
+                            {{ forms.button({
+                                'label': customize_view,
+                                'type': 'button',
+                            }) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Item table #}
+    <div class="card">
+        <div class="card-content">
+            {% if _messages is empty %}
+                <div class="has-text-centered has-text-grey">
+                    - {{ no_items_available }} -
+                </div>
+            {% else %}
+                {% include 'includes/scroll_table_container_buttons.twig' %}
+                <div class="table-container">
+                    <table class="table is-fullwidth is-striped is-hoverable has-valigned-cells">
+                        <thead>
+                            <tr>
+                                <th class="is-narrow">
+                                    {{ time }}
+                                </th>
+                                <th>
+                                    {{ message }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in _messages %}
+                                <tr>
+                                    <td class="has-no-wrap">
+                                        {{ item.time }}
+                                    </td>
+                                    <td>
+                                        {% if item.type == 'info' %}
+                                            <span class="icon is-medium has-text-info app-tooltip" data-tippy-content="{{ info }}">
+                                                <i class="fas fa-info-circle"></i>
+                                            </span>
+                                        {% elseif item.type == 'warning' %}
+                                            <span class="icon is-medium has-text-warning app-tooltip" data-tippy-content="{{ warning }}">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                            </span>
+                                        {% elseif item.type == 'error' %}
+                                            <span class="icon is-medium has-text-danger app-tooltip" data-tippy-content="{{ error }}">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                            </span>
+                                        {% endif %}
+
+                                        {{ item.message }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="42" class="has-text-grey-light">
+                                    {{ _messages|length }} {{ items_total }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    {# Pagination #}
+    {% include 'includes/pagination.twig' with { 'params': _pagination } %}
+
+    {# Modal | Clear messages ======================================================================================= #}
+    <form action="?page=admin_server_messages" method="post">
+        <input type="hidden" name="reset" value="1">
+
+        <div id="app-modal-reset-list" class="modal">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">{{ clear_messages }}</p>
+                    <button class="delete app-modal-close" type="button"></button>
+                </header>
+                <div class="modal-card-body">
+                    <p class="has-text-centered">
+                        {{ are_you_sure }}
+                    </p>
+                </div>
+                <footer class="modal-card-foot">
+                    {{ forms.button({'label': yes, 'style': 'primary' }) }}
+                    {{ forms.button({'label': cancel, 'class': 'app-modal-close', 'type': 'button' }) }}
+                </footer>
+            </div>
+        </div>
+    </form>
+
+{% endblock %}
